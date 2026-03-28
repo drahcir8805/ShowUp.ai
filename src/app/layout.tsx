@@ -33,7 +33,7 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="mesh-bg min-h-full flex flex-col text-zinc-100">
+      <body className="mesh-bg text-[var(--foreground)] min-h-full flex flex-col">
         {children}
       </body>
     </html>

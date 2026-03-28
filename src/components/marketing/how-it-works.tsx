@@ -28,11 +28,16 @@ export function HowItWorks() {
         </p>
         <ol className="mt-16 grid gap-8 sm:grid-cols-3">
           {steps.map((s) => (
-            <li key={s.step} className="relative">
-              <span className="font-mono text-sm text-[var(--accent)]">
+            <li
+              key={s.step}
+              className="relative rounded-2xl border border-[#d4cfba]/90 bg-[#ebe8d5] p-6 shadow-[0_4px_20px_rgba(62,56,40,0.08),0_2px_6px_rgba(62,56,40,0.05)] ring-1 ring-[#c9c2a8]/40"
+            >
+              <span className="inline-flex min-h-[2rem] min-w-[2.75rem] items-center justify-center rounded-lg border border-[#c9c2a8]/50 bg-[#ddd8c4] font-mono text-sm font-semibold text-[var(--accent)] shadow-inner shadow-[#a3987a]/15">
                 {s.step}
               </span>
-              <h3 className="mt-2 text-xl font-semibold text-[#4a4a4a]">{s.title}</h3>
+              <h3 className="mt-4 text-xl font-semibold text-[#4a4a4a]">
+                {s.title}
+              </h3>
               <p className="mt-3 text-sm leading-relaxed text-[#6a6a6a]">
                 {s.body}
               </p>

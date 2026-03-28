@@ -30,7 +30,7 @@ export function Hero() {
           </Link>
           <Link
             href="#how"
-            className="inline-flex h-12 min-w-[180px] items-center justify-center rounded-full border border-[#d4d4aa]/30 bg-[#f5f5dc]/30 px-8 text-sm font-medium text-[#4a4a4a] transition-colors hover:border-[var(--accent)] hover:bg-[var(--yellow)]/20"
+            className="inline-flex h-12 min-w-[180px] items-center justify-center rounded-full bg-[var(--yellow)] px-8 text-sm font-semibold text-[#292524] shadow-sm transition-[filter] hover:brightness-95"
           >
             See how it works
           </Link>
