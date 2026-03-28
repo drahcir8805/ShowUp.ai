@@ -1,10 +1,12 @@
 @import "tailwindcss";
 
 :root {
-  --background: #050508;
-  --foreground: #f4f4f5;
-  --accent: #5eead4;
-  --accent-glow: rgba(94, 234, 212, 0.35);
+  --background: #f5f5dc; /* beige background */
+  --foreground: #4a4a4a; /* dark text for readability */
+  --accent: #9b59b6; /* purple accent */
+  --accent-glow: rgba(155, 89, 182, 0.35);
+  --yellow: #f1c40f; /* yellow accent */
+  --yellow-glow: rgba(241, 196, 15, 0.35);
 }
 
 @theme inline {
@@ -25,17 +27,17 @@ body {
   background-image:
     radial-gradient(
       ellipse 120% 80% at 50% -20%,
-      rgba(94, 234, 212, 0.12),
+      var(--yellow-glow),
       transparent 55%
     ),
     radial-gradient(
       ellipse 60% 50% at 100% 50%,
-      rgba(99, 102, 241, 0.08),
+      var(--accent-glow),
       transparent 50%
     ),
     radial-gradient(
       ellipse 50% 40% at 0% 80%,
-      rgba(94, 234, 212, 0.06),
+      var(--yellow-glow),
       transparent 45%
     );
 }
