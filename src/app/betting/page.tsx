@@ -14,6 +14,7 @@ import { createClassObject } from "@/lib/classes";
 import type { ClassRecord } from "@/lib/classes";
 import { supabase } from "@/lib/supabase";
 import { getCurrentUser, signIn, signUp } from "@/lib/auth";
+import { calculateClassAnalytics } from "@/lib/analytics";
 import { Auth } from "@/components/Auth";
 import { X, Plus, MapPin, Clock, DollarSign, Home, ChevronDown, ChevronUp, TrendingUp, AlertCircle, Target, Zap } from "lucide-react";
 
@@ -31,6 +32,9 @@ interface ClassDraft {
     startTime: string;
     endTime: string;
   };
+  startDate: string;
+  endDate: string;
+  betAmount: number;
   lossAmount: number;
 }
 
@@ -51,6 +55,9 @@ export default function Betting() {
       startTime: "",
       endTime: ""
     },
+    startDate: "",
+    endDate: "",
+    betAmount: 0,
     lossAmount: 0
   });
 
@@ -99,6 +106,9 @@ export default function Betting() {
         days: cls.days_of_week,
         startTime: cls.start_time,
         endTime: cls.end_time,
+        startDate: cls.start_date || "",
+        endDate: cls.end_date || "",
+        betAmount: cls.bet_amount || 0,
         lossAmount: cls.loss_amount,
       }));
       
@@ -146,6 +156,9 @@ export default function Betting() {
       currentClass.homeLat != null &&
       currentClass.homeLng != null &&
       currentClass.schedule.days.length > 0 &&
+      currentClass.startDate &&
+      currentClass.endDate &&
+      currentClass.betAmount > 0 &&
       currentClass.lossAmount > 0
     ) {
       try {
@@ -153,7 +166,7 @@ export default function Betting() {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) throw new Error('User not authenticated');
 
-        // Insert class into Supabase
+        console.log("Saving class to Supabase...");
         const { data, error } = await supabase
           .from('classes')
           .insert({
@@ -166,7 +179,13 @@ export default function Betting() {
             start_time: currentClass.schedule.startTime,
             end_time: currentClass.schedule.endTime,
             days_of_week: currentClass.schedule.days,
+            start_date: currentClass.startDate,
+            end_date: currentClass.endDate,
+            bet_amount: currentClass.betAmount,
             loss_amount: currentClass.lossAmount,
+            current_streak: 0,
+            week_attendance: 0,
+            total_saved: 0,
           })
           .select()
           .single();
@@ -185,6 +204,9 @@ export default function Betting() {
           days: data.days_of_week,
           startTime: data.start_time,
           endTime: data.end_time,
+          startDate: data.start_date,
+          endDate: data.end_date,
+          betAmount: data.bet_amount,
           lossAmount: data.loss_amount,
         });
 
@@ -201,6 +223,9 @@ export default function Betting() {
             startTime: "",
             endTime: ""
           },
+          startDate: "",
+          endDate: "",
+          betAmount: 0,
           lossAmount: 0
         });
         setShowInsertModal(false);
@@ -266,10 +291,75 @@ export default function Betting() {
 
             <div className="p-6 space-y-6">
               {/* Bet Amount Section */}
+              <div className="bg-gradient-to-r from-green-50 to-green-100 rounded-xl p-6 border border-green-200">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 bg-green-600 rounded-full flex items-center justify-center">
+                    <DollarSign className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-[#4a4a4a]">Set Bet Amount</h3>
+                    <p className="text-sm text-[#6a6a6a]">Your initial bankroll for this class</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-3 gap-3">
+                  {[100, 250, 500].map(amount => (
+                    <Button
+                      key={amount}
+                      variant={currentClass.betAmount === amount ? "default" : "outline"}
+                      onClick={() => setCurrentClass(prev => ({ ...prev, betAmount: amount }))}
+                      className={`${currentClass.betAmount === amount ? 'bg-green-600' : 'border-green-200'} text-[#4a4a4a]`}
+                    >
+                      ${amount}
+                    </Button>
+                  ))}
+                </div>
+                <Input
+                  type="number"
+                  value={currentClass.betAmount > 0 ? currentClass.betAmount : ""}
+                  onChange={(e) => setCurrentClass(prev => ({ ...prev, betAmount: Number(e.target.value) }))}
+                  placeholder="Custom bet amount"
+                  className="mt-3 bg-white border-green-200"
+                />
+              </div>
+
+              {/* Class Duration Section */}
+              <div className="bg-gradient-to-r from-blue-50 to-blue-100 rounded-xl p-6 border border-blue-200">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center">
+                    <Clock className="w-6 h-6 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-lg font-semibold text-[#4a4a4a]">Class Duration</h3>
+                    <p className="text-sm text-[#6a6a6a]">Start and end dates for this semester</p>
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-[#4a4a4a] font-medium">Start Date</Label>
+                    <Input
+                      type="date"
+                      value={currentClass.startDate}
+                      onChange={(e) => setCurrentClass(prev => ({ ...prev, startDate: e.target.value }))}
+                      className="mt-2 bg-white border-blue-200"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-[#4a4a4a] font-medium">End Date</Label>
+                    <Input
+                      type="date"
+                      value={currentClass.endDate}
+                      onChange={(e) => setCurrentClass(prev => ({ ...prev, endDate: e.target.value }))}
+                      className="mt-2 bg-white border-blue-200"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Loss Amount Section */}
               <div className="bg-gradient-to-r from-[var(--accent)]/10 to-[var(--yellow)]/10 rounded-xl p-6 border border-[var(--accent)]/20">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-12 h-12 bg-[var(--accent)] rounded-full flex items-center justify-center">
-                    <DollarSign className="w-6 h-6 text-white" />
+                    <Target className="w-6 h-6 text-white" />
                   </div>
                   <div>
                     <h3 className="text-lg font-semibold text-[#4a4a4a]">Set Loss Amount</h3>
@@ -558,8 +648,12 @@ export default function Betting() {
                         </div>
                         <div className="flex items-center gap-4">
                           <div className="text-right">
+                            <div className="text-2xl font-bold text-green-600">${cls.betAmount || 0}</div>
+                            <div className="text-sm text-[#6a6a6a]">bankroll</div>
+                          </div>
+                          <div className="text-right">
                             <div className="text-2xl font-bold text-[var(--accent)]">${cls.lossAmount}</div>
-                            <div className="text-sm text-[#6a6a6a]">per absence</div>
+                            <div className="text-sm text-[#6a6a6a]">for skipping</div>
                           </div>
                           <div className="text-[#6a6a6a]">
                             {expandedClasses.has(cls.id) ? (
@@ -586,34 +680,43 @@ export default function Betting() {
                           </div>
 
                           {/* Attendance Analytics */}
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div className="bg-gradient-to-r from-green-50 to-green-100 p-4 rounded-lg border border-green-200">
-                              <div className="flex items-center gap-2 mb-2">
-                                <TrendingUp className="w-4 h-4 text-green-600" />
-                                <span className="text-sm font-medium text-green-800">Current Streak</span>
+                          {(() => {
+                            const analytics = calculateClassAnalytics(cls);
+                            return (
+                              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div className="bg-gradient-to-r from-green-50 to-green-100 p-4 rounded-lg border border-green-200">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <TrendingUp className="w-4 h-4 text-green-600" />
+                                    <span className="text-sm font-medium text-green-800">Current Streak</span>
+                                  </div>
+                                  <div className="text-2xl font-bold text-green-700">{analytics.currentStreak} days</div>
+                                  <div className="text-xs text-green-600">
+                                    {analytics.currentStreak > 0 ? "Keep it going!" : "Start your streak!"}
+                                  </div>
+                                </div>
+                                
+                                <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <Zap className="w-4 h-4 text-blue-600" />
+                                    <span className="text-sm font-medium text-blue-800">This Week</span>
+                                  </div>
+                                  <div className="text-2xl font-bold text-blue-700">{analytics.weekAttendance}</div>
+                                  <div className="text-xs text-blue-600">
+                                    {analytics.isPerfectWeek ? "Perfect attendance!" : `${analytics.weekAttendancePercent.toFixed(0)}% attendance`}
+                                  </div>
+                                </div>
+                                
+                                <div className="bg-gradient-to-r from-purple-50 to-purple-100 p-4 rounded-lg border border-purple-200">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    <DollarSign className="w-4 h-4 text-purple-600" />
+                                    <span className="text-sm font-medium text-purple-800">Saved</span>
+                                  </div>
+                                  <div className="text-2xl font-bold text-purple-700">${analytics.totalSaved}</div>
+                                  <div className="text-xs text-purple-600">This semester</div>
+                                </div>
                               </div>
-                              <div className="text-2xl font-bold text-green-700">5 days</div>
-                              <div className="text-xs text-green-600">Keep it going!</div>
-                            </div>
-                            
-                            <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200">
-                              <div className="flex items-center gap-2 mb-2">
-                                <Zap className="w-4 h-4 text-blue-600" />
-                                <span className="text-sm font-medium text-blue-800">This Week</span>
-                              </div>
-                              <div className="text-2xl font-bold text-blue-700">4/4</div>
-                              <div className="text-xs text-blue-600">Perfect attendance</div>
-                            </div>
-                            
-                            <div className="bg-gradient-to-r from-purple-50 to-purple-100 p-4 rounded-lg border border-purple-200">
-                              <div className="flex items-center gap-2 mb-2">
-                                <DollarSign className="w-4 h-4 text-purple-600" />
-                                <span className="text-sm font-medium text-purple-800">Saved</span>
-                              </div>
-                              <div className="text-2xl font-bold text-purple-700">${cls.lossAmount * 4}</div>
-                              <div className="text-xs text-purple-600">This week</div>
-                            </div>
-                          </div>
+                            );
+                          })()}
 
                           {/* Smart Insights */}
                           <div className="bg-gradient-to-r from-[var(--accent)]/10 to-[var(--yellow)]/10 p-4 rounded-lg border border-[var(--accent)]/20">
