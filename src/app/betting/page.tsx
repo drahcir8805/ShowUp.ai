@@ -8,27 +8,37 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { SiteHeader } from "@/components/marketing/site-header";
-import { X, Plus, MapPin, Clock, DollarSign, Home } from "lucide-react";
+import { AddressSearch } from "@/components/AddressSearch";
+import { ClassMap } from "@/components/ClassMap";
+import { createClassObject } from "@/lib/classes";
+import type { ClassRecord } from "@/lib/classes";
+import { X, Plus, MapPin, Clock, DollarSign, Home, ChevronDown, ChevronUp, TrendingUp, AlertCircle, Target, Zap } from "lucide-react";
 
-interface ClassInfo {
+/** Modal draft — becomes a `ClassRecord` via `createClassObject` on save. */
+interface ClassDraft {
   name: string;
-  classAddress: string;
+  address: string;
+  lat?: number;
+  lng?: number;
   homeAddress: string;
+  homeLat?: number;
+  homeLng?: number;
   schedule: {
     days: string[];
     startTime: string;
     endTime: string;
   };
-  lossAmount: number; // Amount lost per missed class
+  lossAmount: number;
 }
 
 export default function Betting() {
-  const [classes, setClasses] = useState<ClassInfo[]>([]);
+  const [classes, setClasses] = useState<ClassRecord[]>([]);
   const [showInsertModal, setShowInsertModal] = useState(false);
   const [totalBetAmount] = useState(0); // Initial bankroll
-  const [currentClass, setCurrentClass] = useState<ClassInfo>({
+  const [expandedClasses, setExpandedClasses] = useState<Set<string>>(new Set());
+  const [currentClass, setCurrentClass] = useState<ClassDraft>({
     name: "",
-    classAddress: "",
+    address: "",
     homeAddress: "",
     schedule: {
       days: [],
@@ -39,6 +49,18 @@ export default function Betting() {
   });
 
   const daysOfWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+  const toggleClassExpansion = (classId: string) => {
+    setExpandedClasses(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(classId)) {
+        newSet.delete(classId);
+      } else {
+        newSet.add(classId);
+      }
+      return newSet;
+    });
+  };
 
   const handleDayToggle = (day: string) => {
     setCurrentClass(prev => ({
@@ -53,12 +75,34 @@ export default function Betting() {
   };
 
   const addClass = () => {
-    if (currentClass.name && currentClass.classAddress && currentClass.homeAddress && 
-        currentClass.schedule.days.length > 0 && currentClass.lossAmount > 0) {
-      setClasses([...classes, currentClass]);
+    if (
+      currentClass.name &&
+      currentClass.address &&
+      currentClass.homeAddress &&
+      currentClass.lat != null &&
+      currentClass.lng != null &&
+      currentClass.homeLat != null &&
+      currentClass.homeLng != null &&
+      currentClass.schedule.days.length > 0 &&
+      currentClass.lossAmount > 0
+    ) {
+      const record = createClassObject({
+        name: currentClass.name,
+        address: currentClass.address,
+        lat: currentClass.lat,
+        lng: currentClass.lng,
+        homeAddress: currentClass.homeAddress,
+        homeLat: currentClass.homeLat,
+        homeLng: currentClass.homeLng,
+        days: currentClass.schedule.days,
+        startTime: currentClass.schedule.startTime,
+        endTime: currentClass.schedule.endTime,
+        lossAmount: currentClass.lossAmount,
+      });
+      setClasses([...classes, record]);
       setCurrentClass({
         name: "",
-        classAddress: "",
+        address: "",
         homeAddress: "",
         schedule: {
           days: [],
@@ -164,12 +208,28 @@ export default function Betting() {
                     <MapPin className="w-4 h-4" />
                     Class Building Address
                   </Label>
-                  <Input
-                    value={currentClass.classAddress}
-                    onChange={(e) => setCurrentClass(prev => ({ ...prev, classAddress: e.target.value }))}
-                    placeholder="e.g., 123 Tech Building, Room 101"
-                    className="mt-2 bg-white border-[#d4d4aa]/30"
-                  />
+                  <div className="mt-2">
+                    <AddressSearch
+                      placeholder="e.g., Science Building, Waterloo"
+                      onSelect={(location) => {
+                        setCurrentClass((prev) => ({
+                          ...prev,
+                          address: location.address,
+                          lat: location.lat,
+                          lng: location.lng,
+                        }));
+                      }}
+                    />
+                    {currentClass.lat && currentClass.lng && (
+                      <div className="mt-3">
+                        <ClassMap 
+                          lat={currentClass.lat} 
+                          lng={currentClass.lng} 
+                          enableFlyTo={true}
+                        />
+                      </div>
+                    )}
+                  </div>
                 </div>
 
                 <div>
@@ -177,12 +237,28 @@ export default function Betting() {
                     <Home className="w-4 h-4" />
                     Your Home Address
                   </Label>
-                  <Input
-                    value={currentClass.homeAddress}
-                    onChange={(e) => setCurrentClass(prev => ({ ...prev, homeAddress: e.target.value }))}
-                    placeholder="e.g., 456 Campus Dorm, Room 202"
-                    className="mt-2 bg-white border-[#d4d4aa]/30"
-                  />
+                  <div className="mt-2">
+                    <AddressSearch
+                      placeholder="e.g., Student Residence, Waterloo"
+                      onSelect={(location) => {
+                        setCurrentClass((prev) => ({
+                          ...prev,
+                          homeAddress: location.address,
+                          homeLat: location.lat,
+                          homeLng: location.lng,
+                        }));
+                      }}
+                    />
+                    {currentClass.homeLat && currentClass.homeLng && (
+                      <div className="mt-3">
+                        <ClassMap 
+                          lat={currentClass.homeLat} 
+                          lng={currentClass.homeLng} 
+                          enableFlyTo={true}
+                        />
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -262,8 +338,17 @@ export default function Betting() {
                 <Button
                   onClick={addClass}
                   className="flex-1 bg-[var(--accent)] text-white"
-                  disabled={!currentClass.name || !currentClass.classAddress || !currentClass.homeAddress || 
-                           currentClass.schedule.days.length === 0 || currentClass.lossAmount === 0}
+                  disabled={
+                    !currentClass.name ||
+                    !currentClass.address ||
+                    !currentClass.homeAddress ||
+                    currentClass.lat == null ||
+                    currentClass.lng == null ||
+                    currentClass.homeLat == null ||
+                    currentClass.homeLng == null ||
+                    currentClass.schedule.days.length === 0 ||
+                    currentClass.lossAmount === 0
+                  }
                 >
                   Add Class - ${currentClass.lossAmount}
                 </Button>
@@ -324,28 +409,127 @@ export default function Betting() {
 
             {/* Classes List */}
             <div className="space-y-4">
-              {classes.map((cls, index) => (
-                <Card key={index} className="bg-white/80 border-[#d4d4aa]/30">
-                  <CardContent className="p-6">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="text-xl font-semibold text-[#4a4a4a]">{cls.name}</h3>
-                        <div className="flex items-center gap-4 mt-2 text-sm text-[#6a6a6a]">
-                          <span className="flex items-center gap-1">
-                            <MapPin className="w-4 h-4" />
-                            {cls.classAddress}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Clock className="w-4 h-4" />
-                            {cls.schedule.days.join(", ")} • {cls.schedule.startTime}
-                          </span>
+              {classes.map((cls) => (
+                <Card key={cls.id} className="bg-white/80 border-[#d4d4aa]/30 overflow-hidden">
+                  <CardContent className="p-0">
+                    {/* Main Class Info - Clickable Header */}
+                    <div 
+                      className="p-6 cursor-pointer hover:bg-[#f5f5dc]/20 transition-colors"
+                      onClick={() => toggleClassExpansion(cls.id)}
+                    >
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <div className="flex items-center gap-3">
+                            <h3 className="text-xl font-semibold text-[#4a4a4a]">{cls.name}</h3>
+                            <div className="flex items-center gap-1 text-xs px-2 py-1 bg-[var(--accent)]/10 text-[var(--accent)] rounded-full">
+                              <Target className="w-3 h-3" />
+                              Active
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-4 mt-2 text-sm text-[#6a6a]">
+                            <span className="flex items-center gap-1">
+                              <MapPin className="w-4 h-4" />
+                              {cls.address}
+                            </span>
+                            <span className="flex items-center gap-1">
+                              <Clock className="w-4 h-4" />
+                              {cls.days.join(", ")} • {cls.startTime}
+                            </span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-4">
+                          <div className="text-right">
+                            <div className="text-2xl font-bold text-[var(--accent)]">${cls.lossAmount}</div>
+                            <div className="text-sm text-[#6a6a6a]">per absence</div>
+                          </div>
+                          <div className="text-[#6a6a6a]">
+                            {expandedClasses.has(cls.id) ? (
+                              <ChevronUp className="w-5 h-5" />
+                            ) : (
+                              <ChevronDown className="w-5 h-5" />
+                            )}
+                          </div>
                         </div>
                       </div>
-                      <div className="text-right">
-                        <div className="text-2xl font-bold text-[var(--accent)]">${cls.lossAmount}</div>
-                        <div className="text-sm text-[#6a6a6a]">per absence</div>
-                      </div>
                     </div>
+
+                    {/* Dropdown Content */}
+                    {expandedClasses.has(cls.id) && (
+                      <div className="border-t border-[#d4d4aa]/20 bg-gradient-to-b from-[#f5f5dc]/10 to-transparent">
+                        <div className="p-6 space-y-6">
+                          {/* Map Preview */}
+                          <div>
+                            <h4 className="text-sm font-semibold text-[#4a4a4a] mb-3 flex items-center gap-2">
+                              <MapPin className="w-4 h-4" />
+                              Location
+                            </h4>
+                            <ClassMap lat={cls.lat} lng={cls.lng} />
+                          </div>
+
+                          {/* Attendance Analytics */}
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                            <div className="bg-gradient-to-r from-green-50 to-green-100 p-4 rounded-lg border border-green-200">
+                              <div className="flex items-center gap-2 mb-2">
+                                <TrendingUp className="w-4 h-4 text-green-600" />
+                                <span className="text-sm font-medium text-green-800">Current Streak</span>
+                              </div>
+                              <div className="text-2xl font-bold text-green-700">5 days</div>
+                              <div className="text-xs text-green-600">Keep it going!</div>
+                            </div>
+                            
+                            <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200">
+                              <div className="flex items-center gap-2 mb-2">
+                                <Zap className="w-4 h-4 text-blue-600" />
+                                <span className="text-sm font-medium text-blue-800">This Week</span>
+                              </div>
+                              <div className="text-2xl font-bold text-blue-700">4/4</div>
+                              <div className="text-xs text-blue-600">Perfect attendance</div>
+                            </div>
+                            
+                            <div className="bg-gradient-to-r from-purple-50 to-purple-100 p-4 rounded-lg border border-purple-200">
+                              <div className="flex items-center gap-2 mb-2">
+                                <DollarSign className="w-4 h-4 text-purple-600" />
+                                <span className="text-sm font-medium text-purple-800">Saved</span>
+                              </div>
+                              <div className="text-2xl font-bold text-purple-700">${cls.lossAmount * 4}</div>
+                              <div className="text-xs text-purple-600">This week</div>
+                            </div>
+                          </div>
+
+                          {/* Smart Insights */}
+                          <div className="bg-gradient-to-r from-[var(--accent)]/10 to-[var(--yellow)]/10 p-4 rounded-lg border border-[var(--accent)]/20">
+                            <div className="flex items-center gap-2 mb-3">
+                              <AlertCircle className="w-4 h-4 text-[var(--accent)]" />
+                              <h4 className="text-sm font-semibold text-[#4a4a4a]">Smart Insights</h4>
+                            </div>
+                            <div className="space-y-2 text-sm text-[#6a6a6a]">
+                              <div className="flex items-start gap-2">
+                                <div className="w-2 h-2 bg-green-500 rounded-full mt-1.5"></div>
+                                <p>Your attendance rate is <span className="font-semibold text-green-600">92%</span> - above average!</p>
+                              </div>
+                              <div className="flex items-start gap-2">
+                                <div className="w-2 h-2 bg-blue-500 rounded-full mt-1.5"></div>
+                                <p>Best performance on <span className="font-semibold">Tuesdays</span> - keep that momentum!</p>
+                              </div>
+                              <div className="flex items-start gap-2">
+                                <div className="w-2 h-2 bg-[var(--accent)] rounded-full mt-1.5"></div>
+                                <p>Next class in <span className="font-semibold">2 hours 15 mins</span> - you're on track!</p>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* Quick Actions */}
+                          <div className="flex gap-3">
+                            <Button className="flex-1 bg-[var(--accent)] text-white hover:bg-[var(--accent)]/90">
+                              Check In Now
+                            </Button>
+                            <Button variant="outline" className="border-[#d4d4aa]/30 text-[#4a4a4a]">
+                              View History
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               ))}
