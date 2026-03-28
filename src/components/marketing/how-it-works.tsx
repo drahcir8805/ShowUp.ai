@@ -1,18 +1,18 @@
 const steps = [
   {
     step: "01",
-    title: "Pick your class or crew",
-    body: "Spin up a market for a recurring slot — think “Will Jay make 8 a.m. Macro three weeks in a row?”",
+    title: "Set your line",
+    body: "Bet on yourself by putting money into the app. Set your stake for the semester - the more you commit, the more you have to lose (or prove).",
   },
   {
     step: "02",
-    title: "Set the line",
-    body: "Define odds, deadlines, and how attendance is verified. Everyone sees the same rulebook.",
+    title: "Go to class",
+    body: "Add your class locations and schedules. The app tracks your location during class time - show up and you're safe, skip class and lose your stake.",
   },
   {
     step: "03",
-    title: "Resolve and climb",
-    body: "Outcomes settle from real check-ins. Track streaks, leaderboards, and who’s actually locked in.",
+    title: "Settle the market",
+    body: "Location data automatically resolves your bets. Attendance is verified, money is deducted for absences, and your reputation is updated.",
   },
 ];
 
@@ -20,10 +20,10 @@ export function HowItWorks() {
   return (
     <section id="how" className="scroll-mt-24 px-6 py-24">
       <div className="mx-auto max-w-6xl">
-        <h2 className="text-center text-sm font-medium uppercase tracking-widest text-zinc-500">
+        <h2 className="text-center text-sm font-medium uppercase tracking-widest text-[#6a6a6a]">
           How it works
         </h2>
-        <p className="mx-auto mt-3 max-w-2xl text-center text-3xl font-semibold tracking-tight text-white sm:text-4xl">
+        <p className="mx-auto mt-3 max-w-2xl text-center text-3xl font-semibold tracking-tight text-[#4a4a4a] sm:text-4xl">
           Three steps from idea to settled market.
         </p>
         <ol className="mt-16 grid gap-8 sm:grid-cols-3">
@@ -32,8 +32,8 @@ export function HowItWorks() {
               <span className="font-mono text-sm text-[var(--accent)]">
                 {s.step}
               </span>
-              <h3 className="mt-2 text-xl font-semibold text-white">{s.title}</h3>
-              <p className="mt-3 text-sm leading-relaxed text-zinc-400">
+              <h3 className="mt-2 text-xl font-semibold text-[#4a4a4a]">{s.title}</h3>
+              <p className="mt-3 text-sm leading-relaxed text-[#6a6a6a]">
                 {s.body}
               </p>
             </li>

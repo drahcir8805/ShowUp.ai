@@ -1,4 +1,3 @@
-import { Features } from "@/components/marketing/features";
 import { Hero } from "@/components/marketing/hero";
 import { HowItWorks } from "@/components/marketing/how-it-works";
 import { SiteFooter } from "@/components/marketing/site-footer";
@@ -11,7 +10,6 @@ export default function Home() {
       <SiteHeader />
       <main>
         <Hero />
-        <Features />
         <HowItWorks />
         <WaitlistCta />
       </main>
