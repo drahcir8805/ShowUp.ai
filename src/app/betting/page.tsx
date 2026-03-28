@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -12,6 +12,9 @@ import { AddressSearch } from "@/components/AddressSearch";
 import { ClassMap } from "@/components/ClassMap";
 import { createClassObject } from "@/lib/classes";
 import type { ClassRecord } from "@/lib/classes";
+import { supabase } from "@/lib/supabase";
+import { getCurrentUser, signIn, signUp } from "@/lib/auth";
+import { Auth } from "@/components/Auth";
 import { X, Plus, MapPin, Clock, DollarSign, Home, ChevronDown, ChevronUp, TrendingUp, AlertCircle, Target, Zap } from "lucide-react";
 
 /** Modal draft — becomes a `ClassRecord` via `createClassObject` on save. */
@@ -36,6 +39,9 @@ export default function Betting() {
   const [showInsertModal, setShowInsertModal] = useState(false);
   const [totalBetAmount] = useState(0); // Initial bankroll
   const [expandedClasses, setExpandedClasses] = useState<Set<string>>(new Set());
+  const [user, setUser] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [authChecked, setAuthChecked] = useState(false);
   const [currentClass, setCurrentClass] = useState<ClassDraft>({
     name: "",
     address: "",
@@ -47,6 +53,62 @@ export default function Betting() {
     },
     lossAmount: 0
   });
+
+  // Check authentication on component mount
+  useEffect(() => {
+    checkAuth();
+  }, []);
+
+  const checkAuth = async () => {
+    try {
+      const currentUser = await getCurrentUser();
+      setUser(currentUser);
+      setAuthChecked(true);
+      
+      if (currentUser) {
+        fetchClasses();
+      } else {
+        setLoading(false);
+      }
+    } catch (error) {
+      console.error('Auth check failed:', error);
+      setAuthChecked(true);
+      setLoading(false);
+    }
+  };
+
+  const fetchClasses = async () => {
+    try {
+      setLoading(true);
+      const { data, error } = await supabase
+        .from('classes')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      
+      // Convert Supabase data to ClassRecord format
+      const classRecords: ClassRecord[] = (data || []).map(cls => createClassObject({
+        name: cls.name,
+        address: cls.address,
+        lat: cls.latitude,
+        lng: cls.longitude,
+        homeAddress: "", // We'll need to add home address to schema later
+        homeLat: 0,
+        homeLng: 0,
+        days: cls.days_of_week,
+        startTime: cls.start_time,
+        endTime: cls.end_time,
+        lossAmount: cls.loss_amount,
+      }));
+      
+      setClasses(classRecords);
+    } catch (error) {
+      console.error('Error fetching classes:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const daysOfWeek = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
@@ -74,7 +136,7 @@ export default function Betting() {
     }));
   };
 
-  const addClass = () => {
+  const addClass = async () => {
     if (
       currentClass.name &&
       currentClass.address &&
@@ -86,32 +148,66 @@ export default function Betting() {
       currentClass.schedule.days.length > 0 &&
       currentClass.lossAmount > 0
     ) {
-      const record = createClassObject({
-        name: currentClass.name,
-        address: currentClass.address,
-        lat: currentClass.lat,
-        lng: currentClass.lng,
-        homeAddress: currentClass.homeAddress,
-        homeLat: currentClass.homeLat,
-        homeLng: currentClass.homeLng,
-        days: currentClass.schedule.days,
-        startTime: currentClass.schedule.startTime,
-        endTime: currentClass.schedule.endTime,
-        lossAmount: currentClass.lossAmount,
-      });
-      setClasses([...classes, record]);
-      setCurrentClass({
-        name: "",
-        address: "",
-        homeAddress: "",
-        schedule: {
-          days: [],
-          startTime: "",
-          endTime: ""
-        },
-        lossAmount: 0
-      });
-      setShowInsertModal(false);
+      try {
+        // Get current user
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error('User not authenticated');
+
+        // Insert class into Supabase
+        const { data, error } = await supabase
+          .from('classes')
+          .insert({
+            user_id: user.id,
+            name: currentClass.name,
+            address: currentClass.address,
+            latitude: currentClass.lat,
+            longitude: currentClass.lng,
+            radius: 100, // Default 100m radius
+            start_time: currentClass.schedule.startTime,
+            end_time: currentClass.schedule.endTime,
+            days_of_week: currentClass.schedule.days,
+            loss_amount: currentClass.lossAmount,
+          })
+          .select()
+          .single();
+
+        if (error) throw error;
+
+        // Create ClassRecord from Supabase data
+        const record = createClassObject({
+          name: data.name,
+          address: data.address,
+          lat: data.latitude,
+          lng: data.longitude,
+          homeAddress: currentClass.homeAddress,
+          homeLat: currentClass.homeLat!,
+          homeLng: currentClass.homeLng!,
+          days: data.days_of_week,
+          startTime: data.start_time,
+          endTime: data.end_time,
+          lossAmount: data.loss_amount,
+        });
+
+        // Update local state
+        setClasses(prev => [record, ...prev]);
+
+        // Reset form
+        setCurrentClass({
+          name: "",
+          address: "",
+          homeAddress: "",
+          schedule: {
+            days: [],
+            startTime: "",
+            endTime: ""
+          },
+          lossAmount: 0
+        });
+        setShowInsertModal(false);
+      } catch (error) {
+        console.error('Error adding class:', error);
+        alert('Error adding class. Please try again.');
+      }
     }
   };
 
@@ -121,6 +217,19 @@ export default function Betting() {
     console.log("Final bets:", { totalBetAmount, classes });
     alert(`Betting setup complete! Initial bankroll: $${totalBetAmount}, Potential loss per class: $${totalPotentialLoss}`);
   };
+
+  // Show auth screen if not authenticated
+  if (!authChecked) {
+    return (
+      <div className="min-h-screen bg-[#f5f5dc] flex items-center justify-center">
+        <div className="animate-spin w-12 h-12 border-4 border-[var(--accent)] border-t-transparent rounded-full"></div>
+      </div>
+    );
+  }
+
+  if (!user) {
+    return <Auth onAuth={checkAuth} />;
+  }
 
   return (
     <div className="min-h-screen bg-[#f5f5dc]">
@@ -365,7 +474,17 @@ export default function Betting() {
           <p className="text-[#6a6a6a]">Manage your class bets and track your attendance</p>
         </div>
 
-        {classes.length === 0 ? (
+        {loading ? (
+          <Card className="bg-white/80 border-[#d4d4aa]/30 text-center py-16">
+            <CardContent>
+              <div className="w-20 h-20 bg-[var(--accent)]/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <div className="animate-spin w-10 h-10 border-4 border-[var(--accent)] border-t-transparent rounded-full"></div>
+              </div>
+              <h3 className="text-xl font-semibold text-[#4a4a4a] mb-2">Loading Classes</h3>
+              <p className="text-[#6a6a6a]">Fetching your betting setup...</p>
+            </CardContent>
+          </Card>
+        ) : classes.length === 0 ? (
           <Card className="bg-white/80 border-[#d4d4aa]/30 text-center py-16">
             <CardContent>
               <div className="w-20 h-20 bg-[var(--accent)]/20 rounded-full flex items-center justify-center mx-auto mb-4">
