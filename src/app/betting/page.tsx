@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -25,8 +25,7 @@ interface ClassInfo {
 export default function Betting() {
   const [classes, setClasses] = useState<ClassInfo[]>([]);
   const [showInsertModal, setShowInsertModal] = useState(false);
-  const [totalBetAmount, setTotalBetAmount] = useState(0); // Initial bankroll
-  const [betAmountInput, setBetAmountInput] = useState(""); // For input field
+  const [totalBetAmount] = useState(0); // Initial bankroll
   const [currentClass, setCurrentClass] = useState<ClassInfo>({
     name: "",
     classAddress: "",
@@ -247,7 +246,7 @@ export default function Betting() {
               <Alert className="bg-blue-50 border-blue-200">
                 <AlertDescription className="text-blue-800">
                   🎯 <strong>How it works:</strong> The app uses your location data to verify attendance. 
-                  If you're not at the class address during class time, you'll lose your bet amount. 
+                  If you&apos;re not at the class address during class time, you&apos;ll lose your bet amount. 
                   If you attend, you keep your money. No deductions for showing up!
                 </AlertDescription>
               </Alert>
@@ -288,7 +287,9 @@ export default function Betting() {
                 <Plus className="w-10 h-10 text-[var(--accent)]" />
               </div>
               <h3 className="text-xl font-semibold text-[#4a4a4a] mb-2">No Classes Yet</h3>
-              <p className="text-[#6a6a6a] mb-6">Click "Insert Class" to get started with your betting setup</p>
+              <p className="text-[#6a6a6a] mb-6">
+                Click &quot;Insert Class&quot; to get started with your betting setup
+              </p>
               <Button
                 onClick={() => setShowInsertModal(true)}
                 className="bg-[var(--accent)] text-white"
