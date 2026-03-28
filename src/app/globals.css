@@ -10,11 +10,21 @@
 @custom-variant dark (&:is(.dark *));
 
 :root { /* beige background */ /* dark text for readability */
-  --accent: oklch(0.97 0 0); /* purple accent */
-  --accent-glow: rgba(155, 89, 182, 0.35);
+  /* Landing page — one cohesive beige ramp (sections + mesh use these) */
+  --landing-base: #f3ede2;
+  --landing-warm: #e9e1d2;
+  --landing-muted: #e2d8c4;
+  --landing-card: #e8e0d4;
+  --landing-card-deep: #d4c9b0;
+  --landing-border: #c9bda4;
+  --landing-line: rgba(201, 189, 164, 0.4);
+  /* Brand purple — shadcn’s default --accent is a neutral tint; we use this for ShowUp + var(--accent) in marketing */
+  --accent: #9b59b6;
+  --accent-foreground: #fafafa;
+  --accent-glow: rgba(155, 89, 182, 0.14);
   --yellow: #f1c40f; /* yellow accent */
-  --yellow-glow: rgba(241, 196, 15, 0.35);
-  --background: oklch(1 0 0);
+  --yellow-glow: rgba(241, 196, 15, 0.12);
+  --background: var(--landing-base);
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
@@ -26,7 +36,6 @@
   --secondary-foreground: oklch(0.205 0 0);
   --muted: oklch(0.97 0 0);
   --muted-foreground: oklch(0.556 0 0);
-  --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
   --border: oklch(0.922 0 0);
   --input: oklch(0.922 0 0);
@@ -96,22 +105,23 @@ body {
 }
 
 .mesh-bg {
-  background-color: var(--background);
+  background-color: var(--landing-base);
+  /* Soft blooms on the same beige hue — stays even while scrolling */
   background-image:
     radial-gradient(
-      ellipse 120% 80% at 50% -20%,
+      ellipse 130% 85% at 50% -15%,
       var(--yellow-glow),
-      transparent 55%
+      transparent 58%
     ),
     radial-gradient(
-      ellipse 60% 50% at 100% 50%,
+      ellipse 75% 55% at 100% 42%,
       var(--accent-glow),
-      transparent 50%
+      transparent 54%
     ),
     radial-gradient(
-      ellipse 50% 40% at 0% 80%,
+      ellipse 65% 48% at 0% 88%,
       var(--yellow-glow),
-      transparent 45%
+      transparent 50%
     );
 }
 
@@ -127,9 +137,9 @@ body {
  --secondary: oklch(0.269 0 0);
  --secondary-foreground: oklch(0.985 0 0);
  --muted: oklch(0.269 0 0);
- --muted-foreground: oklch(0.708 0 0);
- --accent: oklch(0.269 0 0);
- --accent-foreground: oklch(0.985 0 0);
+  --muted-foreground: oklch(0.708 0 0);
+ --accent: #9b59b6;
+ --accent-foreground: #fafafa;
  --destructive: oklch(0.704 0.191 22.216);
  --border: oklch(1 0 0 / 10%);
  --input: oklch(1 0 0 / 15%);
@@ -158,5 +168,5 @@ body {
  }
   html {
     @apply font-sans;
- }
+  }
 }

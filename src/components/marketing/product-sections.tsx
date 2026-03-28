@@ -1,8 +1,10 @@
+import { FlickeringGrid } from "@/components/ui/flickering-grid";
+
 export function WhyMarketsSection() {
   return (
     <section
       id="why"
-      className="scroll-mt-24 border-t border-[#d4cfba]/70 px-6 py-24"
+      className="scroll-mt-24 border-t border-[var(--landing-line)] px-6 py-24"
     >
       <div className="mx-auto max-w-6xl">
         <p className="text-center text-sm font-medium uppercase tracking-widest text-[#6a6a6a]">
@@ -18,7 +20,7 @@ export function WhyMarketsSection() {
           updates, not as you update your story.
         </p>
         <div className="mt-14 grid gap-8 sm:grid-cols-2">
-          <div className="rounded-2xl border border-[#d4cfba]/90 bg-[#ebe8d5] p-8 shadow-[0_4px_20px_rgba(62,56,40,0.06)] ring-1 ring-[#c9c2a8]/40">
+          <div className="rounded-2xl border border-[var(--landing-border)]/45 bg-[var(--landing-card)] p-8 shadow-[0_4px_20px_rgba(62,56,40,0.05)] ring-1 ring-[var(--landing-border)]/25">
             <h3 className="text-lg font-semibold text-[#4a4a4a]">
               Skin in the game
             </h3>
@@ -28,7 +30,7 @@ export function WhyMarketsSection() {
               cut; when you lock in, you prove the doubters wrong.
             </p>
           </div>
-          <div className="rounded-2xl border border-[#d4cfba]/90 bg-[#ebe8d5] p-8 shadow-[0_4px_20px_rgba(62,56,40,0.06)] ring-1 ring-[#c9c2a8]/40">
+          <div className="rounded-2xl border border-[var(--landing-border)]/45 bg-[var(--landing-card)] p-8 shadow-[0_4px_20px_rgba(62,56,40,0.05)] ring-1 ring-[var(--landing-border)]/25">
             <h3 className="text-lg font-semibold text-[#4a4a4a]">
               Social accountability
             </h3>
@@ -64,9 +66,24 @@ export function ProductHighlightsSection() {
   return (
     <section
       id="features"
-      className="scroll-mt-24 border-t border-[#d4cfba]/70 bg-[#ebe8d5]/35 px-6 py-24"
+      className="relative scroll-mt-24 overflow-hidden border-t border-[var(--landing-line)] bg-[var(--landing-base)] px-6 py-24"
     >
-      <div className="mx-auto max-w-6xl">
+      <div
+        className="pointer-events-none absolute inset-0 z-0"
+        aria-hidden
+      >
+        <FlickeringGrid
+          squareSize={3}
+          gridGap={5}
+          flickerChance={0.35}
+          color="rgb(95, 84, 68)"
+          maxOpacity={0.2}
+          className="h-full min-h-[320px] w-full"
+        />
+      </div>
+      {/* Light wash only — must stay partly transparent or it hides the canvas grid */}
+      <div className="pointer-events-none absolute inset-0 z-[1] bg-[color-mix(in_srgb,var(--landing-warm)_22%,transparent)]" />
+      <div className="relative z-10 mx-auto max-w-6xl">
         <p className="text-center text-sm font-medium uppercase tracking-widest text-[#6a6a6a]">
           What you’re building toward
         </p>
@@ -77,7 +94,7 @@ export function ProductHighlightsSection() {
           {highlights.map((item) => (
             <li
               key={item.title}
-              className="rounded-2xl border border-[#d4cfba]/90 bg-[#f5f5dc] p-6 shadow-[0_4px_16px_rgba(62,56,40,0.05)] ring-1 ring-[#c9c2a8]/35"
+              className="rounded-2xl border border-[var(--landing-border)]/55 bg-[var(--landing-card-deep)] p-6 shadow-[0_4px_16px_rgba(45,40,30,0.06)] ring-1 ring-[var(--landing-border)]/30 backdrop-blur-[1px]"
             >
               <h3 className="text-lg font-semibold text-[#4a4a4a]">
                 {item.title}
@@ -110,7 +127,10 @@ const trustPoints = [
 
 export function TrustResolutionSection() {
   return (
-    <section id="trust" className="scroll-mt-24 border-t border-[#d4cfba]/70 px-6 py-24">
+    <section
+      id="trust"
+      className="scroll-mt-24 border-t border-[var(--landing-line)] px-6 py-24"
+    >
       <div className="mx-auto max-w-6xl">
         <p className="text-center text-sm font-medium uppercase tracking-widest text-[#6a6a6a]">
           Trust & fairness
@@ -127,7 +147,7 @@ export function TrustResolutionSection() {
           {trustPoints.map((item) => (
             <li
               key={item.title}
-              className="flex gap-4 rounded-2xl border border-[#d4cfba]/80 bg-[#ebe8d5]/80 px-5 py-4 shadow-sm ring-1 ring-[#c9c2a8]/30"
+              className="flex gap-4 rounded-2xl border border-[var(--landing-border)]/40 bg-[color-mix(in_srgb,var(--landing-card)_88%,var(--landing-base))] px-5 py-4 shadow-sm ring-1 ring-[var(--landing-border)]/22"
             >
               <span
                 className="mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-[var(--yellow)] text-xs font-bold text-[#292524]"

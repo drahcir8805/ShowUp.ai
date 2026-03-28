@@ -10,7 +10,7 @@ export function Hero() {
         <div className="absolute -top-32 left-1/2 h-[480px] w-[900px] -translate-x-1/2 rounded-full bg-[radial-gradient(ellipse_at_center,var(--accent-glow),transparent_65%)] blur-3xl" />
       </div>
       <div className="relative mx-auto max-w-3xl text-center">
-        <p className="mb-6 inline-flex items-center rounded-full border border-[#d4d4aa]/20 bg-[#f5f5dc]/50 px-3 py-1 text-xs font-medium uppercase tracking-widest text-[#6a6a6a]">
+        <p className="mb-6 inline-flex items-center rounded-full border border-[var(--landing-border)]/35 bg-[color-mix(in_srgb,var(--landing-warm)_55%,var(--landing-base))] px-3 py-1 text-xs font-medium uppercase tracking-widest text-[#6a6a6a]">
           Prediction markets for campus life
         </p>
         <h1 className="text-balance text-4xl font-semibold tracking-tight text-[#4a4a4a] sm:text-5xl sm:leading-[1.1]">

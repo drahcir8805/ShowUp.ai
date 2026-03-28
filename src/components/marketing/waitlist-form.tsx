@@ -34,7 +34,7 @@ export function WaitlistForm() {
           required
           placeholder="you@university.edu"
           autoComplete="email"
-          className="h-12 flex-1 rounded-full border border-[#d4cfba] bg-[#f5f5dc] px-5 text-sm text-[#4a4a4a] placeholder:text-[#6a6a6a]/70 outline-none ring-[var(--yellow)]/25 transition-[border-color,box-shadow] focus:border-[var(--accent)]/40 focus:ring-2"
+          className="h-12 flex-1 rounded-full border border-[var(--landing-border)]/55 bg-[var(--landing-base)] px-5 text-sm text-[#4a4a4a] placeholder:text-[#6a6a6a]/70 outline-none ring-[var(--yellow)]/25 transition-[border-color,box-shadow] focus:border-[var(--accent)]/40 focus:ring-2"
         />
         <button
           type="submit"

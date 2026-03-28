@@ -9,7 +9,7 @@ const nav = [
 
 export function SiteHeader() {
   return (
-    <header className="sticky top-0 z-50 border-b border-[#d4d4aa]/20 bg-[#f5f5dc]/90 backdrop-blur-md">
+    <header className="sticky top-0 z-50 border-b border-[var(--landing-line)] bg-[color-mix(in_srgb,var(--landing-base)_92%,transparent)] backdrop-blur-md">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
         <Link
           href="/"

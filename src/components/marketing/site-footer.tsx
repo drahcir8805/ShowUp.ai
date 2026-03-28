@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export function SiteFooter() {
   return (
-    <footer className="border-t border-[#d4cfba]/70 px-6 py-12">
+    <footer className="border-t border-[var(--landing-line)] px-6 py-12">
       <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-6 text-sm text-[#6a6a6a] sm:flex-row">
         <p>
           © {new Date().getFullYear()} ShowUp.ai — prediction markets for
