@@ -127,6 +127,43 @@ body {
     );
 }
 
+/* Hero — dot pattern + soft purple / yellow glows on beige */
+.hero-section-dots {
+  background-color: var(--landing-band);
+  background-image:
+    radial-gradient(
+      circle,
+      color-mix(in srgb, var(--landing-border) 48%, transparent) 1px,
+      transparent 1.75px
+    ),
+    radial-gradient(
+      ellipse 120% 95% at 50% -15%,
+      color-mix(in srgb, var(--accent) 26%, transparent),
+      transparent 58%
+    ),
+    radial-gradient(
+      ellipse 85% 75% at 100% 45%,
+      color-mix(in srgb, var(--yellow) 22%, transparent),
+      transparent 55%
+    ),
+    radial-gradient(
+      ellipse 70% 65% at 0% 85%,
+      color-mix(in srgb, var(--accent) 12%, transparent),
+      transparent 50%
+    );
+  background-size:
+    18px 18px,
+    100% 100%,
+    100% 100%,
+    100% 100%;
+  background-repeat: repeat, no-repeat, no-repeat, no-repeat;
+  background-position:
+    0 0,
+    center top,
+    right center,
+    left bottom;
+}
+
 .dark {
  --background: oklch(0.145 0 0);
  --foreground: oklch(0.985 0 0);
