@@ -3,6 +3,16 @@
 
 @import "tailwindcss";
 
+/* Keep autocomplete suggestions above nearby form sections in modals. */
+.mapboxgl-ctrl-geocoder {
+  width: 100%;
+  max-width: 100%;
+}
+
+.mapboxgl-ctrl-geocoder--suggestions {
+  z-index: 80;
+}
+
 @import "tw-animate-css";
 
 @import "shadcn/tailwind.css";

@@ -469,7 +469,7 @@ export default function BettingPage() {
                   />
                 </div>
 
-                <div>
+                <div className="relative z-40">
                   <Label className="flex items-center gap-2 text-[#4a4a4a] font-medium">
                     <MapPin className="w-4 h-4" />
                     Class Building Address
@@ -498,7 +498,7 @@ export default function BettingPage() {
                   </div>
                 </div>
 
-                <div>
+                <div className="relative z-10">
                   <Label className="flex items-center gap-2 text-[#4a4a4a] font-medium">
                     <Home className="w-4 h-4" />
                     Your Home Address
@@ -919,6 +919,7 @@ export default function BettingPage() {
                 href="#"
                 cta={`$${totalBetAmount} Total`}
                 info={TOTAL_BANKROLL_HELP}
+                onClick={() => setShowClassesOverview(true)}
               />
               
               {/* Insert Class - Bottom Left */}
