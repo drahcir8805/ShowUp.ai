@@ -112,10 +112,12 @@ export default function BettingPage() {
   const [showInsertModal, setShowInsertModal] = useState(false);
   const [showClassesOverview, setShowClassesOverview] = useState(false);
   const [expandedClassesInOverview, setExpandedClassesInOverview] = useState<Set<string>>(new Set());
-  const [totalBetAmount] = useState(0); // Initial bankroll
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [authChecked, setAuthChecked] = useState(false);
+
+  // Calculate total bankroll dynamically
+  const totalBetAmount = classes.reduce((sum, cls) => sum + (cls.betAmount || 0), 0);
   const [currentClass, setCurrentClass] = useState<ClassDraft>({
     name: "",
     address: "",
@@ -765,11 +767,11 @@ export default function BettingPage() {
                                       <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200">
                                         <div className="flex items-center gap-2 mb-2">
                                           <Zap className="w-4 h-4 text-blue-600" />
-                                          <span className="text-sm font-medium text-blue-800">This Week</span>
+                                          <span className="text-sm font-medium text-blue-800">Total Attendance</span>
                                         </div>
                                         <div className="text-2xl font-bold text-blue-700">{analytics.weekAttendance}</div>
                                         <div className="text-xs text-blue-600">
-                                          {analytics.isPerfectWeek ? "Perfect attendance!" : `${analytics.weekAttendancePercent.toFixed(0)}% attendance`}
+                                          {analytics.isPerfectWeek ? "Perfect attendance!" : `${analytics.weekAttendancePercent.toFixed(0)}% completion`}
                                         </div>
                                       </div>
                                       

@@ -6,7 +6,10 @@ interface ClassData {
   bet_amount?: number;
   betAmount?: number;
   days_of_week?: string[];
+  days?: string[];
   loss_amount?: number;
+  startDate?: string;
+  endDate?: string;
 }
 
 interface ClassAnalytics {
@@ -26,20 +29,57 @@ export function calculateClassAnalytics(cls: ClassData): ClassAnalytics {
   
   // Mock data for now - in real app, this would come from attendance_logs table
   const currentStreak = cls.current_streak || 0;
-  const weekAttendance = cls.week_attendance || 0;
+  const attendedClasses = cls.week_attendance || 0;
   const totalSaved = cls.total_saved || 0;
   const betAmount = cls.bet_amount || cls.betAmount || 0;
   
-  // Calculate potential weekly classes
-  const weeklyClasses = cls.days_of_week?.length || 0;
+  // Get class days (prefer days array, fallback to days_of_week)
+  const classDays = cls.days || cls.days_of_week || [];
+  
+  // Calculate total scheduled classes from startDate to endDate
+  let totalScheduledClasses = 0;
+  if (cls.startDate && cls.endDate && classDays.length > 0) {
+    const start = new Date(cls.startDate);
+    const end = new Date(cls.endDate);
+    
+    // Iterate through each week in the date range
+    const currentWeek = new Date(start);
+    while (currentWeek <= end) {
+      // Count classes for this week
+      for (const day of classDays) {
+        const dayMap: { [key: string]: number } = {
+          'Mon': 1, 'Tue': 2, 'Wed': 3, 'Thu': 4, 'Fri': 5, 'Sat': 6, 'Sun': 0
+        };
+        const targetDay = dayMap[day];
+        if (targetDay !== undefined) {
+          const classDate = new Date(currentWeek);
+          classDate.setDate(currentWeek.getDate() + (targetDay - currentWeek.getDay() + 7) % 7);
+          
+          // Check if this class date is within the range
+          if (classDate >= start && classDate <= end) {
+            totalScheduledClasses++;
+          }
+        }
+      }
+      
+      // Move to next week
+      currentWeek.setDate(currentWeek.getDate() + 7);
+    }
+  } else {
+    // Fallback: use weekly classes * 4 weeks as estimate
+    totalScheduledClasses = classDays.length * 4;
+  }
+  
+  // For current week, calculate how many classes should have happened this week
+  const currentWeekClasses = classDays.length;
   
   return {
     currentStreak,
-    weekAttendance: `${weekAttendance}/${weeklyClasses}`,
-    weekAttendancePercent: weeklyClasses > 0 ? (weekAttendance / weeklyClasses) * 100 : 0,
+    weekAttendance: `${attendedClasses}/${totalScheduledClasses}`,
+    weekAttendancePercent: totalScheduledClasses > 0 ? (attendedClasses / totalScheduledClasses) * 100 : 0,
     totalSaved,
     betAmount,
-    isPerfectWeek: weekAttendance === weeklyClasses && weeklyClasses > 0
+    isPerfectWeek: attendedClasses === currentWeekClasses && currentWeekClasses > 0
   };
 }
 
