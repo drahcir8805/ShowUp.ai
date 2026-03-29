@@ -34,17 +34,17 @@ export function WaitlistForm() {
           required
           placeholder="you@university.edu"
           autoComplete="email"
-          className="h-12 flex-1 rounded-full border border-white/15 bg-black/40 px-5 text-sm text-white placeholder:text-zinc-600 outline-none ring-[var(--accent)]/50 transition-[border-color,box-shadow] focus:border-[var(--accent)] focus:ring-2"
+          className="h-12 flex-1 rounded-full border border-[var(--landing-border)]/55 bg-[var(--landing-base)] px-5 text-sm text-[#4a4a4a] placeholder:text-[#6a6a6a]/70 outline-none ring-[var(--yellow)]/25 transition-[border-color,box-shadow] focus:border-[var(--accent)]/40 focus:ring-2"
         />
         <button
           type="submit"
-          className="h-12 shrink-0 rounded-full bg-[var(--accent)] px-8 text-sm font-semibold text-[#050508] transition-opacity hover:opacity-90"
+          className="h-12 shrink-0 rounded-full bg-[var(--yellow)] px-8 text-sm font-semibold text-[#292524] shadow-sm transition-[filter] hover:brightness-95"
         >
           Join waitlist
         </button>
       </form>
       {sent ? (
-        <p className="mt-3 text-center text-xs text-zinc-500">
+        <p className="mt-3 text-center text-xs text-[#6a6a6a]">
           If your mail app did not open, email {CONTACT_EMAIL} directly.
         </p>
       ) : null}
