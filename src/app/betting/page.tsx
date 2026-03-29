@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,8 +17,17 @@ import { supabase } from "@/lib/supabase";
 import { getCurrentUser, signIn, signUp } from "@/lib/auth";
 import { calculateClassAnalytics } from "@/lib/analytics";
 import { Auth } from "@/components/Auth";
-import { X, Plus, MapPin, Clock, DollarSign, Home, ChevronDown, ChevronUp, TrendingUp, AlertCircle, Target, Zap, TrendingDown, Calendar, Award, Users, BarChart3 } from "lucide-react";
+import { ArrowLeft, X, Plus, MapPin, Clock, DollarSign, Home, ChevronDown, ChevronUp, TrendingUp, AlertCircle, Target, Zap, TrendingDown, Calendar, Award, Users, BarChart3, HelpCircle } from "lucide-react";
 import { BentoCard, BentoGrid } from "@/components/ui/bento-grid";
+import { FlickeringSectionOverlays } from "@/components/marketing/flickering-section-overlays";
+import { AnimatedGridPattern } from "@/components/ui/animated-grid-pattern";
+import {
+  AnalyticsBentoArt,
+  BankrollBentoArt,
+  BentoTileArtLayer,
+  CalendarBentoArt,
+  InsertClassBentoArt,
+} from "@/components/betting/bento-tile-art";
 
 /** Modal draft — becomes a `ClassRecord` via `createClassObject` on save. */
 interface ClassDraft {
@@ -37,6 +47,58 @@ interface ClassDraft {
   endDate: string;
   betAmount: number;
   lossAmount: number;
+}
+
+const TOTAL_BANKROLL_HELP =
+  "Total bankroll is the sum of stakes you set for each class—your full committed pool across all classes.";
+
+function BettingAnimatedBackground() {
+  return (
+    <>
+      <div className="pointer-events-none absolute inset-0 z-0" aria-hidden>
+        <AnimatedGridPattern
+          width={32}
+          height={32}
+          numSquares={55}
+          maxOpacity={0.42}
+          duration={3}
+          repeatDelay={0.45}
+          className="h-full min-h-screen w-full text-[#9b59b6]/35 stroke-neutral-400/25"
+        />
+      </div>
+      <FlickeringSectionOverlays />
+    </>
+  );
+}
+
+function TotalBankrollLabel() {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="relative flex items-center gap-1 text-sm text-gray-600">
+      <span>Total Bankroll</span>
+      <button
+        type="button"
+        aria-label="What is Total Bankroll?"
+        aria-expanded={open}
+        className="shrink-0 rounded-full p-0.5 text-gray-500 hover:bg-gray-200/80"
+        onClick={(e) => {
+          e.stopPropagation();
+          setOpen((o) => !o);
+        }}
+      >
+        <HelpCircle className="h-3.5 w-3.5" />
+      </button>
+      {open ? (
+        <div
+          role="dialog"
+          className="absolute left-0 top-full z-[60] mt-1 w-64 rounded-md border border-gray-200 bg-white p-2 text-left text-xs font-normal leading-snug text-gray-700 shadow-lg"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {TOTAL_BANKROLL_HELP}
+        </div>
+      ) : null}
+    </div>
+  );
 }
 
 export default function Betting() {
@@ -248,8 +310,9 @@ export default function Betting() {
   // Show auth screen if not authenticated
   if (!authChecked) {
     return (
-      <div className="min-h-screen bg-[#f5f5dc] flex items-center justify-center">
-        <div className="animate-spin w-12 h-12 border-4 border-[var(--accent)] border-t-transparent rounded-full"></div>
+      <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[var(--landing-base)]">
+        <BettingAnimatedBackground />
+        <div className="relative z-10 h-12 w-12 animate-spin rounded-full border-4 border-[var(--accent)] border-t-transparent" />
       </div>
     );
   }
@@ -259,10 +322,11 @@ export default function Betting() {
   }
 
   return (
-    <div className="min-h-screen bg-[#f5f5dc]">
-      <SiteHeader />
-      
+    <div className="relative min-h-screen overflow-hidden bg-[var(--landing-base)]">
+      <BettingAnimatedBackground />
 
+      <div className="relative z-10">
+      <SiteHeader minimal />
 
       {/* Insert Class Modal */}
       {showInsertModal && (
@@ -602,7 +666,7 @@ export default function Betting() {
                         <DollarSign className="w-8 h-8 text-green-600" />
                         <div>
                           <div className="text-2xl font-bold text-green-600">${totalBetAmount}</div>
-                          <div className="text-sm text-gray-600">Total Bankroll</div>
+                          <TotalBankrollLabel />
                         </div>
                       </div>
                     </div>
@@ -764,6 +828,13 @@ export default function Betting() {
       {/* Main Content */}
       <div className="max-w-4xl mx-auto px-6 py-8">
         <div className="mb-8">
+          <Link
+            href="/"
+            className="mb-4 inline-flex items-center gap-1.5 text-sm font-medium text-[#6a6a6a] transition-colors hover:text-[#4a4a4a]"
+          >
+            <ArrowLeft className="h-4 w-4 shrink-0" aria-hidden />
+            Back
+          </Link>
           <h1 className="text-4xl font-bold text-[#4a4a4a] mb-2">Your Betting Dashboard</h1>
           <p className="text-[#6a6a6a]">Manage your class bets and track your attendance</p>
         </div>
@@ -806,7 +877,9 @@ export default function Betting() {
                 description={`${classes.length} classes scheduled this week`}
                 className="col-span-3 md:col-span-2"
                 background={
-                  <div className="absolute inset-0 bg-gradient-to-br from-purple-500/30 to-pink-500/30" />
+                  <BentoTileArtLayer gradient="from-purple-500/30 to-pink-500/30">
+                    <CalendarBentoArt className="h-44 w-44 md:h-48 md:w-48" />
+                  </BentoTileArtLayer>
                 }
                 Icon={Calendar}
                 href="#"
@@ -820,11 +893,14 @@ export default function Betting() {
                 description={`Your current betting portfolio across ${classes.length} classes`}
                 className="col-span-3 md:col-span-1"
                 background={
-                  <div className="absolute inset-0 bg-gradient-to-br from-[var(--accent)]/30 to-[var(--yellow)]/30" />
+                  <BentoTileArtLayer gradient="from-[var(--accent)]/30 to-[var(--yellow)]/30">
+                    <BankrollBentoArt className="h-40 w-40 md:h-44 md:w-44" />
+                  </BentoTileArtLayer>
                 }
                 Icon={DollarSign}
                 href="#"
                 cta={`$${totalBetAmount} Total`}
+                info={TOTAL_BANKROLL_HELP}
               />
               
               {/* Insert Class - Bottom Left */}
@@ -833,7 +909,9 @@ export default function Betting() {
                 description="Add a new class to your betting portfolio"
                 className="col-span-3 md:col-span-1"
                 background={
-                  <div className="absolute inset-0 bg-gradient-to-br from-green-500/30 to-emerald-500/30" />
+                  <BentoTileArtLayer gradient="from-green-500/30 to-emerald-500/30">
+                    <InsertClassBentoArt className="h-40 w-40 md:h-44 md:w-44" />
+                  </BentoTileArtLayer>
                 }
                 Icon={Plus}
                 href="#"
@@ -847,7 +925,9 @@ export default function Betting() {
                 description="Get insights and analytics on your attendance patterns"
                 className="col-span-3 md:col-span-2"
                 background={
-                  <div className="absolute inset-0 bg-gradient-to-br from-blue-500/30 to-cyan-500/30" />
+                  <BentoTileArtLayer gradient="from-blue-500/30 to-cyan-500/30">
+                    <AnalyticsBentoArt className="h-44 w-44 md:h-52 md:w-52" />
+                  </BentoTileArtLayer>
                 }
                 Icon={BarChart3}
                 href="#"
@@ -873,6 +953,7 @@ export default function Betting() {
             )}
           </div>
         )}
+      </div>
       </div>
     </div>
   );

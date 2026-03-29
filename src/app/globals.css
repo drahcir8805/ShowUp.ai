@@ -11,11 +11,11 @@
 
 :root { /* beige background */ /* dark text for readability */
   /* Landing page — one cohesive beige ramp (sections + mesh use these) */
-  --landing-base: #f3ede2;
-  --landing-warm: #e9e1d2;
-  --landing-muted: #e2d8c4;
-  --landing-card: #e8e0d4;
-  --landing-card-deep: #d4c9b0;
+  --landing-base: #e8e0d4;
+  --landing-warm: #ddd4c4;
+  --landing-muted: #d4c9b0;
+  --landing-card: #ddd4c4;
+  --landing-card-deep: #c9bda4;
   --landing-border: #c9bda4;
   --landing-line: rgba(201, 189, 164, 0.4);
   /* Softer beige for sections without the flickering grid (matches warm wash elsewhere) */
