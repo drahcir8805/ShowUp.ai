@@ -70,21 +70,6 @@ export function WaveGridBackground({
     let animationId: number
     let tick = 0
 
-    // Resize handler
-    const handleResize = () => {
-      const rect = container.getBoundingClientRect()
-      width = rect.width
-      height = rect.height
-      canvas.width = width * dpr
-      canvas.height = height * dpr
-      canvas.style.width = `${width}px`
-      canvas.style.height = `${height}px`
-      ctx.scale(dpr, dpr)
-    }
-
-    const ro = new ResizeObserver(handleResize)
-    ro.observe(container)
-
     // Parse color
     const hexToRgb = (hex: string) => {
       const result = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(hex)
@@ -231,6 +216,26 @@ export function WaveGridBackground({
     } else {
       drawFrame()
     }
+
+    // Resize handler
+    const handleResize = () => {
+      const rect = container.getBoundingClientRect()
+      width = rect.width
+      height = rect.height
+      canvas.width = width * dpr
+      canvas.height = height * dpr
+      canvas.style.width = `${width}px`
+      canvas.style.height = `${height}px`
+      ctx.scale(dpr, dpr)
+
+      // On mobile static mode, explicitly redraw after resize/layout updates.
+      if (!shouldAnimate) {
+        drawFrame()
+      }
+    }
+
+    const ro = new ResizeObserver(handleResize)
+    ro.observe(container)
 
     return () => {
       if (animationId) cancelAnimationFrame(animationId)

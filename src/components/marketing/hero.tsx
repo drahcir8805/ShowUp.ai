@@ -18,6 +18,7 @@ export function Hero() {
       <WaveGridBackground
         className="relative z-[2] min-h-[100dvh] w-full"
         transparentBackdrop
+        disableAnimationOnMobile={false}
         color="#9b59b6"
         gridSize={26}
         waveHeight={56}
