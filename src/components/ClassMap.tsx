@@ -5,13 +5,21 @@ import {
   laurierMaxBounds,
 } from "@/lib/laurier-campus";
 import Map, { Marker, Layer, useMap } from "react-map-gl/mapbox";
-import { useSyncExternalStore, useRef, useEffect, useState } from "react";
+import { useSyncExternalStore, useRef, useEffect } from "react";
 
 type ClassMapProps = {
   lat?: number;
   lng?: number;
   enableFlyTo?: boolean;
 };
+
+function useIsClient() {
+  return useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false,
+  );
+}
 
 // Component to handle fly-to animation
 function MapController({ lat, lng, enableFlyTo }: { lat?: number; lng?: number; enableFlyTo?: boolean }) {
@@ -35,11 +43,7 @@ function MapController({ lat, lng, enableFlyTo }: { lat?: number; lng?: number; 
 
 /** Enhanced map preview with 3D buildings and fly-to animation */
 export function ClassMap({ lat, lng, enableFlyTo = false }: ClassMapProps) {
-  const [isClient, setIsClient] = useState(false);
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
+  const isClient = useIsClient();
 
   if (!lat || !lng) {
     return (

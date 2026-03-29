@@ -16,7 +16,7 @@ import { supabase } from "@/lib/supabase";
 import { getCurrentUser, signIn, signUp } from "@/lib/auth";
 import { calculateClassAnalytics } from "@/lib/analytics";
 import { Auth } from "@/components/Auth";
-import { X, Plus, MapPin, Clock, DollarSign, Home, ChevronDown, ChevronUp, TrendingUp, AlertCircle, Target, Zap, Trash2 } from "lucide-react";
+import { X, Plus, MapPin, Clock, DollarSign, Home, ChevronDown, ChevronUp, TrendingUp, AlertCircle, Target, Zap } from "lucide-react";
 
 /** Modal draft — becomes a `ClassRecord` via `createClassObject` on save. */
 interface ClassDraft {
@@ -46,8 +46,6 @@ export default function Betting() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [authChecked, setAuthChecked] = useState(false);
-  const [checkInResults, setCheckInResults] = useState<Map<string, any>>(new Map());
-  const [checkingIn, setCheckingIn] = useState<Set<string>>(new Set());
   const [currentClass, setCurrentClass] = useState<ClassDraft>({
     name: "",
     address: "",
@@ -96,9 +94,8 @@ export default function Betting() {
 
       if (error) throw error;
       
-      // Convert Supabase data to ClassRecord format using actual database IDs
-      const classRecords: ClassRecord[] = (data || []).map(cls => ({
-        id: cls.id, // Use actual database ID, not generated UUID
+      // Convert Supabase data to ClassRecord format
+      const classRecords: ClassRecord[] = (data || []).map(cls => createClassObject({
         name: cls.name,
         address: cls.address,
         lat: cls.latitude,
@@ -113,10 +110,8 @@ export default function Betting() {
         endDate: cls.end_date || "",
         betAmount: cls.bet_amount || 0,
         lossAmount: cls.loss_amount,
-        userId: cls.user_id,
       }));
       
-      console.log('📚 Fetched classes from database:', classRecords);
       setClasses(classRecords);
     } catch (error) {
       console.error('Error fetching classes:', error);
@@ -197,9 +192,8 @@ export default function Betting() {
 
         if (error) throw error;
 
-        // Create ClassRecord from Supabase data using actual database ID
-        const record: ClassRecord = {
-          id: data.id, // Use actual database ID
+        // Create ClassRecord from Supabase data
+        const record = createClassObject({
           name: data.name,
           address: data.address,
           lat: data.latitude,
@@ -214,8 +208,7 @@ export default function Betting() {
           endDate: data.end_date,
           betAmount: data.bet_amount,
           lossAmount: data.loss_amount,
-          userId: data.user_id,
-        };
+        });
 
         // Update local state
         setClasses(prev => [record, ...prev]);
@@ -245,155 +238,6 @@ export default function Betting() {
 
   const totalPotentialLoss = classes.reduce((sum, cls) => sum + cls.lossAmount, 0);
 
-  const handleCheckIn = async (cls: ClassRecord) => {
-    if (checkingIn.has(cls.id)) return;
-    
-    setCheckingIn(prev => new Set(prev).add(cls.id));
-    
-    try {
-      console.log('📍 Starting check-in for:', cls.name);
-      
-      // Get student's current location
-      const location = await getStudentLocation();
-      console.log('📍 Student location:', location);
-      
-      // Check if they're at class
-      const result = isStudentAtClass(location.lat, location.lng, cls.lat!, cls.lng!);
-      console.log('📏 Check-in result:', result);
-      
-      // Store result
-      setCheckInResults(prev => new Map(prev).set(cls.id, result));
-      
-      // Show alert with result
-      if (result.present) {
-        alert(`✅ Check-in Successful!\n\nYou are at ${cls.name}\nDistance: ${result.distance}m\nStatus: PRESENT`);
-      } else {
-        alert(`❌ Check-in Failed!\n\nYou are NOT at ${cls.name}\nDistance: ${result.distance}m away\nStatus: ABSENT\n\nPenalty: $${cls.lossAmount}`);
-      }
-      
-    } catch (error: any) {
-      console.error('❌ Check-in error:', error);
-      alert(`❌ Check-in Error: ${error.message}`);
-    } finally {
-      setCheckingIn(prev => {
-        const newSet = new Set(prev);
-        newSet.delete(cls.id);
-        return newSet;
-      });
-    }
-  };
-
-  const handleDeleteClass = async (cls: ClassRecord) => {
-    // Check if class is older than 1 week
-    const oneWeekAgo = new Date();
-    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-    
-    if (cls.startDate && new Date(cls.startDate) < oneWeekAgo) {
-      alert('❌ Cannot delete class: Classes older than 1 week cannot be deleted.');
-      return;
-    }
-    
-    // Confirm deletion
-    const confirmed = confirm(`Are you sure you want to delete "${cls.name}"?\n\nThis action cannot be undone.`);
-    if (!confirmed) return;
-    
-    try {
-      console.log('🗑️ Attempting to delete class:', cls.id, cls.name);
-      
-      // First verify the class exists in database
-      const { data: existingClass, error: fetchError } = await supabase
-        .from('classes')
-        .select('*')
-        .eq('id', cls.id)
-        .single();
-      
-      if (fetchError) {
-        console.error('❌ Error fetching class for deletion:', fetchError);
-        throw new Error(`Class not found in database: ${fetchError.message}`);
-      }
-      
-      if (!existingClass) {
-        console.warn('⚠️ Class not found in database:', cls.id);
-        alert('⚠️ Class not found in database. Removing from local view.');
-        setClasses(prev => prev.filter(c => c.id !== cls.id));
-        return;
-      }
-      
-      console.log('✅ Found class in database:', existingClass);
-      
-      // Delete from Supabase with user authentication check
-      const { data: { user } } = await supabase.auth.getUser();
-      if (!user) {
-        throw new Error('User not authenticated');
-      }
-      
-      const { data, error } = await supabase
-        .from('classes')
-        .delete()
-        .eq('id', cls.id)
-        .eq('user_id', user.id) // Ensure user can only delete their own classes
-        .select();
-      
-      console.log('🗑️ Supabase delete response:', { data, error });
-      
-      if (error) {
-        console.error('❌ Supabase delete error:', error);
-        throw new Error(`Database deletion failed: ${error.message}`);
-      }
-      
-      // Verify deletion was successful
-      if (!data || data.length === 0) {
-        throw new Error('Delete operation returned no data - deletion may have failed');
-      }
-      
-      console.log('✅ Successfully deleted from database:', data);
-      
-      // Double-check deletion by trying to fetch the class again
-      const { data: verifyDelete } = await supabase
-        .from('classes')
-        .select('id')
-        .eq('id', cls.id)
-        .single();
-      
-      if (verifyDelete) {
-        console.error('❌ Verification failed - class still exists in database:', verifyDelete);
-        throw new Error('Deletion verification failed - class still exists in database');
-      }
-      
-      console.log('✅ Verified deletion - class no longer exists in database');
-      
-      // Remove from local state
-      setClasses(prev => {
-        const newClasses = prev.filter(c => c.id !== cls.id);
-        console.log('🗑️ Updated local state:', {
-          before: prev.length,
-          after: newClasses.length,
-          deletedId: cls.id
-        });
-        return newClasses;
-      });
-      
-      console.log('✅ Class deletion completed:', cls.name);
-      alert(`✅ "${cls.name}" has been successfully deleted from the database.`);
-      
-    } catch (error: any) {
-      console.error('❌ Delete error:', error);
-      alert(`❌ Error deleting class: ${error.message}`);
-      
-      // Don't remove from local state if database deletion failed
-      // This keeps the UI consistent with the database state
-    }
-  };
-
-  const isClassDeletable = (cls: ClassRecord) => {
-    if (!cls.startDate) return true; // Can delete if no start date
-    
-    const oneWeekAgo = new Date();
-    oneWeekAgo.setDate(oneWeekAgo.getDate() - 7);
-    
-    return new Date(cls.startDate) >= oneWeekAgo;
-  };
-
   const finalizeBets = () => {
     console.log("Final bets:", { totalBetAmount, classes });
     alert(`Betting setup complete! Initial bankroll: $${totalBetAmount}, Potential loss per class: $${totalPotentialLoss}`);
@@ -416,7 +260,6 @@ export default function Betting() {
     <div className="min-h-screen bg-[#f5f5dc]">
       <SiteHeader />
       
-            
       {/* Insert Class Button */}
       <div className="fixed top-20 right-6 z-40">
         <Button
@@ -680,9 +523,6 @@ export default function Betting() {
                   🎯 <strong>How it works:</strong> The app uses your location data to verify attendance. 
                   If you&apos;re not at the class address during class time, you&apos;ll lose your bet amount. 
                   If you attend, you keep your money. No deductions for showing up!
-                  <br /><br />
-                  ⚠️ <strong>Important:</strong> You can delete classes within the first week of creation. 
-                  After 1 week, classes become locked and cannot be deleted to maintain betting integrity.
                 </AlertDescription>
               </Alert>
 
@@ -815,21 +655,6 @@ export default function Betting() {
                             <div className="text-2xl font-bold text-[var(--accent)]">${cls.lossAmount}</div>
                             <div className="text-sm text-[#6a6a6a]">for skipping</div>
                           </div>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDeleteClass(cls);
-                            }}
-                            disabled={!isClassDeletable(cls)}
-                            className={`p-2 rounded-lg transition-colors ${
-                              isClassDeletable(cls) 
-                                ? 'text-red-500 hover:bg-red-50 hover:text-red-600' 
-                                : 'text-gray-300 cursor-not-allowed'
-                            }`}
-                            title={isClassDeletable(cls) ? 'Delete class' : 'Classes older than 1 week cannot be deleted'}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
                           <div className="text-[#6a6a6a]">
                             {expandedClasses.has(cls.id) ? (
                               <ChevronUp className="w-5 h-5" />
@@ -917,24 +742,9 @@ export default function Betting() {
 
                           {/* Quick Actions */}
                           <div className="flex gap-3">
-                            <Button 
-                              onClick={() => handleCheckIn(cls)}
-                              disabled={checkingIn.has(cls.id)}
-                              className="flex-1 bg-[var(--accent)] text-white hover:bg-[var(--accent)]/90 disabled:bg-[var(--accent)]/50"
-                            >
-                              {checkingIn.has(cls.id) ? '🔄 Checking In...' : '📍 Check In Now'}
+                            <Button className="flex-1 bg-[var(--accent)] text-white hover:bg-[var(--accent)]/90">
+                              Check In Now
                             </Button>
-                            {checkInResults.has(cls.id) && (
-                              <div className="px-3 py-2 rounded-lg text-sm">
-                                {checkInResults.get(cls.id)?.present ? (
-                                  <span className="text-green-600 font-medium">✅ Present</span>
-                                ) : (
-                                  <span className="text-red-600 font-medium">
-                                    ❌ {checkInResults.get(cls.id)?.distance}m away
-                                  </span>
-                                )}
-                              </div>
-                            )}
                             <Button variant="outline" className="border-[#d4d4aa]/30 text-[#4a4a4a]">
                               View History
                             </Button>
