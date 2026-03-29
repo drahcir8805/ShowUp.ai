@@ -11,6 +11,9 @@ export type ClassFormInput = {
   days: string[];
   startTime: string;
   endTime: string;
+  startDate: string;
+  endDate: string;
+  betAmount: number;
   lossAmount: number;
   userId?: string | null;
 };
@@ -27,6 +30,9 @@ export type ClassRecord = {
   days: string[];
   startTime: string;
   endTime: string;
+  startDate: string;
+  endDate: string;
+  betAmount: number;
   lossAmount: number;
   userId: string | null;
 };
@@ -44,6 +50,9 @@ export function createClassObject(formData: ClassFormInput): ClassRecord {
     days: formData.days,
     startTime: formData.startTime,
     endTime: formData.endTime,
+    startDate: formData.startDate,
+    endDate: formData.endDate,
+    betAmount: formData.betAmount,
     lossAmount: formData.lossAmount,
     userId: formData.userId ?? null,
     // TODO: insert into Supabase classes table
