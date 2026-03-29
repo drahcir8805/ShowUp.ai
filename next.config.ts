@@ -9,6 +9,8 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: rootDir,
   },
+  allowedDevOrigins: ['127.0.0.1', 'localhost'],
+  outputFileTracingRoot: rootDir,
 };
 
 export default nextConfig;
