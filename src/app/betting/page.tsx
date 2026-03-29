@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -11,13 +11,14 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { SiteHeader } from "@/components/marketing/site-header";
 import { AddressSearch } from "@/components/AddressSearch";
 import { ClassMap } from "@/components/ClassMap";
+import { CheckIn } from "@/components/CheckIn";
 import { createClassObject } from "@/lib/classes";
 import type { ClassRecord } from "@/lib/classes";
 import { supabase } from "@/lib/supabase";
-import { getCurrentUser, signIn, signUp } from "@/lib/auth";
+import { getCurrentUser } from "@/lib/auth";
 import { calculateClassAnalytics } from "@/lib/analytics";
 import { Auth } from "@/components/Auth";
-import { ArrowLeft, X, Plus, MapPin, Clock, DollarSign, Home, ChevronDown, ChevronUp, TrendingUp, AlertCircle, Target, Zap, TrendingDown, Calendar, Award, Users, BarChart3, HelpCircle } from "lucide-react";
+import { ArrowLeft, X, Plus, MapPin, Clock, DollarSign, Home, ChevronDown, ChevronUp, TrendingUp, AlertCircle, Target, Zap, Calendar, BarChart3, HelpCircle } from "lucide-react";
 import { BentoCard, BentoGrid } from "@/components/ui/bento-grid";
 import { FlickeringSectionOverlays } from "@/components/marketing/flickering-section-overlays";
 import { AnimatedGridPattern } from "@/components/ui/animated-grid-pattern";
@@ -47,6 +48,11 @@ interface ClassDraft {
   endDate: string;
   betAmount: number;
   lossAmount: number;
+}
+
+interface User {
+  id: string;
+  email?: string;
 }
 
 const TOTAL_BANKROLL_HELP =
@@ -101,15 +107,17 @@ function TotalBankrollLabel() {
   );
 }
 
-export default function Betting() {
+export default function BettingPage() {
   const [classes, setClasses] = useState<ClassRecord[]>([]);
   const [showInsertModal, setShowInsertModal] = useState(false);
   const [showClassesOverview, setShowClassesOverview] = useState(false);
   const [expandedClassesInOverview, setExpandedClassesInOverview] = useState<Set<string>>(new Set());
-  const [totalBetAmount] = useState(0); // Initial bankroll
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [authChecked, setAuthChecked] = useState(false);
+
+  // Calculate total bankroll dynamically
+  const totalBetAmount = classes.reduce((sum, cls) => sum + (cls.betAmount || 0), 0);
   const [currentClass, setCurrentClass] = useState<ClassDraft>({
     name: "",
     address: "",
@@ -125,12 +133,7 @@ export default function Betting() {
     lossAmount: 0
   });
 
-  // Check authentication on component mount
-  useEffect(() => {
-    checkAuth();
-  }, []);
-
-  const checkAuth = async () => {
+  const checkAuth = useCallback(async () => {
     try {
       const currentUser = await getCurrentUser();
       setUser(currentUser);
@@ -146,7 +149,12 @@ export default function Betting() {
       setAuthChecked(true);
       setLoading(false);
     }
-  };
+  }, []);
+
+  // Check authentication on component mount
+  useEffect(() => {
+    checkAuth();
+  }, [checkAuth]);
 
   const fetchClasses = async () => {
     try {
@@ -685,7 +693,6 @@ export default function Betting() {
                   <h3 className="text-lg font-semibold text-gray-800 mb-4">All Classes</h3>
                   <div className="space-y-3">
                     {classes.map((cls) => {
-                      const analytics = calculateClassAnalytics(cls);
                       const isExpanded = expandedClassesInOverview.has(cls.id);
                       return (
                         <div key={cls.id} className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow">
@@ -760,11 +767,11 @@ export default function Betting() {
                                       <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200">
                                         <div className="flex items-center gap-2 mb-2">
                                           <Zap className="w-4 h-4 text-blue-600" />
-                                          <span className="text-sm font-medium text-blue-800">This Week</span>
+                                          <span className="text-sm font-medium text-blue-800">Total Attendance</span>
                                         </div>
                                         <div className="text-2xl font-bold text-blue-700">{analytics.weekAttendance}</div>
                                         <div className="text-xs text-blue-600">
-                                          {analytics.isPerfectWeek ? "Perfect attendance!" : `${analytics.weekAttendancePercent.toFixed(0)}% attendance`}
+                                          {analytics.isPerfectWeek ? "Perfect attendance!" : `${analytics.weekAttendancePercent.toFixed(0)}% completion`}
                                         </div>
                                       </div>
                                       
@@ -797,19 +804,28 @@ export default function Betting() {
                                     </div>
                                     <div className="flex items-start gap-2">
                                       <div className="w-2 h-2 bg-[var(--accent)] rounded-full mt-1.5"></div>
-                                      <p>Next class in <span className="font-semibold">2 hours 15 mins</span> - you're on track!</p>
+                                      <p>Next class in <span className="font-semibold">2 hours 15 mins</span> - you&apos;re on track!</p>
                                     </div>
                                   </div>
                                 </div>
 
-                                {/* Quick Actions */}
-                                <div className="flex gap-3">
-                                  <Button className="flex-1 bg-[var(--accent)] text-white hover:bg-[var(--accent)]/90 hover:scale-105 hover:shadow-lg transition-all duration-200 transform">
-                                    Check In Now
-                                  </Button>
-                                  <Button variant="outline" className="border-[#d4d4aa]/30 text-[#4a4a4a] hover:bg-[#d4d4aa]/50 hover:border-[var(--accent)]/50 transition-all duration-200">
-                                    View History
-                                  </Button>
+                                {/* Check-in Component */}
+                                <div className="mt-4">
+                                  <CheckIn 
+                                    classData={{
+                                      id: cls.id,
+                                      name: cls.name,
+                                      lat: cls.lat,
+                                      lng: cls.lng,
+                                      startTime: cls.startTime,
+                                      endTime: cls.endTime,
+                                      days: cls.days
+                                    }}
+                                    onCheckInComplete={(result) => {
+                                      console.log('Check-in completed:', result);
+                                      // Here you could update UI or save to database
+                                    }}
+                                  />
                                 </div>
                               </div>
                             </div>

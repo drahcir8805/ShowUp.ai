@@ -3,6 +3,12 @@ import React from "react";
 import { motion } from "motion/react";
 import { cn } from "@/lib/utils";
 
+// Helper function to generate deterministic "random" values
+const deterministicRandom = (index: number, seed: number = 1) => {
+  const x = Math.sin(seed + index) * 10000;
+  return x - Math.floor(x);
+};
+
 export type BackgroundBeamsVariant = "default" | "warm";
 
 export const BackgroundBeams = React.memo(
@@ -156,13 +162,13 @@ export const BackgroundBeams = React.memo(
                   x1: ["0%", "100%"],
                   x2: ["0%", "95%"],
                   y1: ["0%", "100%"],
-                  y2: ["0%", `${93 + Math.random() * 8}%`],
+                  y2: ["0%", `${93 + deterministicRandom(index, 1) * 8}%`],
                 }}
                 transition={{
-                  duration: Math.random() * 10 + 10,
+                  duration: deterministicRandom(index, 2) * 10 + 10,
                   ease: "easeInOut",
                   repeat: Infinity,
-                  delay: Math.random() * 10,
+                  delay: deterministicRandom(index, 3) * 10,
                 }}
               >
                 {variant === "warm" && warmLines ? (
