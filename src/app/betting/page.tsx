@@ -855,6 +855,14 @@ export default function BettingPage() {
           </Link>
           <h1 className="text-4xl font-bold text-[#4a4a4a] mb-2">Your Betting Dashboard</h1>
           <p className="text-[#6a6a6a]">Manage your class bets and track your attendance</p>
+          <div className="mt-2 flex gap-4 text-sm">
+            <Link href="/check-in" className="text-[var(--accent)] underline">
+              Location check-in
+            </Link>
+            <Link href="/profile" className="text-[var(--accent)] underline">
+              Profile & friends
+            </Link>
+          </div>
         </div>
 
         {loading ? (
