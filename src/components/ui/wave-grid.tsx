@@ -22,6 +22,10 @@ export interface WaveGridBackgroundProps {
   horizonRatio?: number
   /** When true, only the grid lines are drawn; parent can show CSS gradients / patterns behind. */
   transparentBackdrop?: boolean
+  /** Disable wave animation on narrow screens to keep mobile UI stable. */
+  disableAnimationOnMobile?: boolean
+  /** Pin wave layer to viewport on mobile while scrolling. */
+  lockToViewportOnMobile?: boolean
 }
 
 const DEFAULT_BG = "#e8e0d4"
@@ -38,6 +42,8 @@ export function WaveGridBackground({
   vignetteEdgeColor = DEFAULT_VIGNETTE_EDGE,
   horizonRatio = 0.6,
   transparentBackdrop = false,
+  disableAnimationOnMobile = true,
+  lockToViewportOnMobile = false,
 }: WaveGridBackgroundProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -119,8 +125,11 @@ export function WaveGridBackground({
       }
     }
 
-    // Animation
-    const animate = () => {
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    const isMobileViewport = window.matchMedia("(max-width: 768px)").matches
+    const shouldAnimate = !(prefersReducedMotion || (disableAnimationOnMobile && isMobileViewport))
+
+    const drawFrame = () => {
       tick += 0.015 * waveSpeed
 
       if (transparentBackdrop) {
@@ -212,13 +221,19 @@ export function WaveGridBackground({
         ctx.fillRect(0, 0, width, height)
       }
 
-      animationId = requestAnimationFrame(animate)
+      if (shouldAnimate) {
+        animationId = requestAnimationFrame(drawFrame)
+      }
     }
 
-    animationId = requestAnimationFrame(animate)
+    if (shouldAnimate) {
+      animationId = requestAnimationFrame(drawFrame)
+    } else {
+      drawFrame()
+    }
 
     return () => {
-      cancelAnimationFrame(animationId)
+      if (animationId) cancelAnimationFrame(animationId)
       ro.disconnect()
     }
   }, [
@@ -229,6 +244,7 @@ export function WaveGridBackground({
     backgroundColor,
     horizonRatio,
     transparentBackdrop,
+    disableAnimationOnMobile,
   ])
 
   return (
@@ -241,7 +257,13 @@ export function WaveGridBackground({
       )}
       style={transparentBackdrop ? undefined : { backgroundColor }}
     >
-      <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />
+      <canvas
+        ref={canvasRef}
+        className={cn(
+          "absolute inset-0 h-full w-full",
+          lockToViewportOnMobile && "fixed z-[2] md:absolute md:z-auto",
+        )}
+      />
 
       {!transparentBackdrop ? (
         <>

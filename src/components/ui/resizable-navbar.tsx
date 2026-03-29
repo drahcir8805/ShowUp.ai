@@ -9,7 +9,7 @@ import {
 } from "motion/react";
 import Image from "next/image";
 
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 
 interface NavbarProps {
@@ -209,24 +209,54 @@ export const MobileNavMenu = ({
   isOpen,
   onClose,
 }: MobileNavMenuProps) => {
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handlePointerDown = (event: PointerEvent) => {
+      const target = event.target as Node | null;
+      if (!panelRef.current || !target) return;
+      if (!panelRef.current.contains(target)) {
+        onClose();
+      }
+    };
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose();
+      }
+    };
+
+    document.addEventListener("pointerdown", handlePointerDown);
+    document.addEventListener("keydown", handleEscape);
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [isOpen, onClose]);
+
+  const childNodes = React.Children.toArray(children);
+
   return (
     <AnimatePresence>
       {isOpen && (
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          onClick={onClose}
+          initial={{ opacity: 0, y: -8, scale: 0.98 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: -8, scale: 0.98 }}
+          ref={panelRef}
           className={cn(
-            "fixed inset-0 z-50 flex items-start justify-start bg-black/20 backdrop-blur-sm",
+            "absolute inset-x-0 top-full z-50 mt-2 origin-top rounded-lg border border-[var(--landing-border)]/40 bg-[var(--landing-base)] p-3 shadow-lg",
             className,
           )}
         >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className="absolute inset-x-0 top-16 flex w-full flex-col items-start justify-start gap-4 rounded-lg bg-white px-4 py-8 shadow-[0_0_24px_rgba(34,_42,_53,_0.06),_0_1px_1px_rgba(0,_0,_0,_0.05),_0_0_0_1px_rgba(34,_42,_53,_0.04),_0_0_4px_rgba(34,_42,_53,_0.08),_0_16px_68px_rgba(47,_48,_55,_0.05),_0_1px_0_rgba(255,_255,_255,_0.1)_inset] dark:bg-neutral-950"
-          >
-            {children}
+          <div className="w-full divide-y divide-[var(--landing-border)]/35">
+            {childNodes.map((child, index) => (
+              <div key={index} className="py-2 first:pt-0 last:pb-0">
+                {child}
+              </div>
+            ))}
           </div>
         </motion.div>
       )}
