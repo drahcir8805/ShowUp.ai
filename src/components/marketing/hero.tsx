@@ -22,7 +22,7 @@ export function Hero() {
         gridSize={26}
         waveHeight={56}
         waveSpeed={0.85}
-        horizonRatio={0.86}
+        horizonRatio={0.9}
       >
         <div className="mx-auto flex min-h-[100dvh] max-w-3xl flex-col items-center justify-start px-6 pb-28 pt-[clamp(3.25rem,11vh,6.5rem)] text-center sm:pb-36 sm:pt-[clamp(5rem,18vh,10rem)]">
           <p className="mb-6 inline-flex items-center rounded-full border border-[var(--landing-border)]/35 bg-[color-mix(in_srgb,var(--landing-warm)_55%,var(--landing-base))] px-3 py-1 text-xs font-medium uppercase tracking-widest text-[#6a6a6a]">
