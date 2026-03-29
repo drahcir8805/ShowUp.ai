@@ -1,5 +1,25 @@
+// Define interfaces for better type safety
+interface ClassData {
+  current_streak?: number;
+  week_attendance?: number;
+  total_saved?: number;
+  bet_amount?: number;
+  betAmount?: number;
+  days_of_week?: string[];
+  loss_amount?: number;
+}
+
+interface ClassAnalytics {
+  currentStreak: number;
+  weekAttendance: string;
+  weekAttendancePercent: number;
+  totalSaved: number;
+  betAmount: number;
+  isPerfectWeek: boolean;
+}
+
 // Calculate attendance analytics for a class
-export function calculateClassAnalytics(cls: any) {
+export function calculateClassAnalytics(cls: ClassData): ClassAnalytics {
   const today = new Date();
   const weekStart = new Date(today);
   weekStart.setDate(today.getDate() - today.getDay());
@@ -24,7 +44,7 @@ export function calculateClassAnalytics(cls: any) {
 }
 
 // Update class analytics when attendance is marked
-export function updateClassAttendance(cls: any, present: boolean) {
+export function updateClassAttendance(cls: ClassData, present: boolean) {
   const analytics = calculateClassAnalytics(cls);
   
   if (present) {
@@ -32,7 +52,7 @@ export function updateClassAttendance(cls: any, present: boolean) {
     return {
       current_streak: analytics.currentStreak + 1,
       week_attendance: parseInt(analytics.weekAttendance.split('/')[0]) + 1,
-      total_saved: analytics.totalSaved + cls.loss_amount
+      total_saved: analytics.totalSaved + (cls.loss_amount || 0)
     };
   } else {
     // User missed class - deduct from bet amount
@@ -40,7 +60,7 @@ export function updateClassAttendance(cls: any, present: boolean) {
       current_streak: 0,
       week_attendance: parseInt(analytics.weekAttendance.split('/')[0]),
       total_saved: analytics.totalSaved,
-      bet_amount: Math.max(0, cls.bet_amount - cls.loss_amount)
+      bet_amount: Math.max(0, (cls.bet_amount || 0) - (cls.loss_amount || 0))
     };
   }
 }

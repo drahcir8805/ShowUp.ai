@@ -5,6 +5,12 @@ import { motion } from "motion/react"
 
 import { cn } from "@/lib/utils"
 
+// Helper function to generate deterministic "random" values
+const deterministicRandom = (index: number, seed: number = 1) => {
+  const x = Math.sin(seed + index) * 10000;
+  return x - Math.floor(x);
+};
+
 /**
  *  DotPattern Component Props
  *
@@ -102,8 +108,8 @@ export function DotPattern({
       return {
         x: col * width + cx + x,
         y: row * height + cy + y,
-        delay: Math.random() * 5,
-        duration: Math.random() * 3 + 2,
+        delay: deterministicRandom(i, 1) * 5,
+        duration: deterministicRandom(i, 2) * 3 + 2,
       }
     }
   )

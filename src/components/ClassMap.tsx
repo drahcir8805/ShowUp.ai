@@ -1,11 +1,10 @@
 "use client";
 
 import {
-  LAURIER_MAP_STYLE,
   laurierMaxBounds,
 } from "@/lib/laurier-campus";
 import Map, { Marker, Layer, useMap } from "react-map-gl/mapbox";
-import { useSyncExternalStore, useRef, useEffect } from "react";
+import { useSyncExternalStore, useEffect } from "react";
 
 type ClassMapProps = {
   lat?: number;
