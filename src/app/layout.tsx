@@ -33,8 +33,12 @@ export default function RootLayout({
     <html
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
+      suppressHydrationWarning
     >
-      <body className="mesh-bg text-[var(--foreground)] min-h-full flex flex-col">
+      <body
+        className="mesh-bg text-[var(--foreground)] min-h-full flex flex-col"
+        suppressHydrationWarning
+      >
         <SmoothAnchorScroll />
         {children}
       </body>
