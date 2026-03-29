@@ -18,7 +18,7 @@ import { supabase } from "@/lib/supabase";
 import { getCurrentUser } from "@/lib/auth";
 import { calculateClassAnalytics } from "@/lib/analytics";
 import { Auth } from "@/components/Auth";
-import { ArrowLeft, X, Plus, MapPin, Clock, DollarSign, Home, ChevronDown, ChevronUp, TrendingUp, AlertCircle, Target, Zap, Calendar, BarChart3, HelpCircle } from "lucide-react";
+import { ArrowLeft, X, Plus, MapPin, Clock, DollarSign, Home, ChevronDown, ChevronUp, TrendingUp, AlertCircle, Target, Zap, Calendar, BarChart3, HelpCircle, TrendingDown, Activity } from "lucide-react";
 import { BentoCard, BentoGrid } from "@/components/ui/bento-grid";
 import { FlickeringSectionOverlays } from "@/components/marketing/flickering-section-overlays";
 import { AnimatedGridPattern } from "@/components/ui/animated-grid-pattern";
@@ -111,6 +111,8 @@ export default function BettingPage() {
   const [classes, setClasses] = useState<ClassRecord[]>([]);
   const [showInsertModal, setShowInsertModal] = useState(false);
   const [showClassesOverview, setShowClassesOverview] = useState(false);
+  const [showBankrollAnalytics, setShowBankrollAnalytics] = useState(false);
+  const [showAIReport, setShowAIReport] = useState(false);
   const [expandedClassesInOverview, setExpandedClassesInOverview] = useState<Set<string>>(new Set());
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -948,6 +950,7 @@ export default function BettingPage() {
                 Icon={BarChart3}
                 href="#"
                 cta="View Analytics"
+                onClick={() => setShowAIReport(true)}
               />
             </BentoGrid>
 
@@ -966,6 +969,156 @@ export default function BettingPage() {
                   </Button>
                 </CardContent>
               </Card>
+            )}
+
+            {/* AI Report Modal */}
+            {showAIReport && (
+              <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-6">
+                <div className="bg-white rounded-2xl max-w-5xl w-full max-h-[90vh] overflow-y-auto shadow-2xl">
+                  <div className="sticky top-0 bg-white border-b border-gray-200 p-6 flex items-center justify-between">
+                    <div>
+                      <h2 className="text-2xl font-bold text-gray-900">AI Analytics Report</h2>
+                      <p className="text-sm text-gray-600 mt-1">Smart insights for each of your classes</p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      onClick={() => setShowAIReport(false)}
+                      className="h-8 w-8 p-0"
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
+
+                  <div className="p-6 space-y-6">
+                    {classes.map((cls) => {
+                      const analytics = calculateClassAnalytics(cls);
+                      const attendanceRate = analytics.weekAttendancePercent;
+                      const missRate = 100 - attendanceRate;
+                      const potentialSavings = cls.lossAmount * parseInt(analytics.weekAttendance.split('/')[0]);
+                      const potentialLosses = cls.lossAmount * parseInt(analytics.weekAttendance.split('/')[1]) - potentialSavings;
+
+                      return (
+                        <div key={cls.id} className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-xl border border-blue-200">
+                          <div className="flex items-start justify-between mb-4">
+                            <div>
+                              <h3 className="text-xl font-bold text-gray-900">{cls.name}</h3>
+                              <p className="text-sm text-gray-600">{cls.address}</p>
+                            </div>
+                            <div className="text-right">
+                              <div className={`text-2xl font-bold ${attendanceRate >= 80 ? 'text-green-600' : attendanceRate >= 60 ? 'text-yellow-600' : 'text-red-600'}`}>
+                                {attendanceRate.toFixed(1)}%
+                              </div>
+                              <div className="text-xs text-gray-600">Attendance Rate</div>
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <div className="bg-white p-4 rounded-lg border border-gray-200">
+                              <div className="flex items-center gap-2 mb-2">
+                                <Calendar className="h-5 w-5 text-blue-600" />
+                                <span className="text-sm font-medium text-gray-700">Weekly Performance</span>
+                              </div>
+                              <div className="text-lg font-bold text-gray-900">{analytics.weekAttendance}</div>
+                              <div className="text-xs text-gray-600">
+                                {analytics.isPerfectWeek ? "Perfect attendance!" : `${attendanceRate.toFixed(0)}% completion`}
+                              </div>
+                            </div>
+
+                            <div className="bg-white p-4 rounded-lg border border-gray-200">
+                              <div className="flex items-center gap-2 mb-2">
+                                <Target className="h-5 w-5 text-purple-600" />
+                                <span className="text-sm font-medium text-gray-700">Current Streak</span>
+                              </div>
+                              <div className="text-lg font-bold text-gray-900">{analytics.currentStreak} days</div>
+                              <div className="text-xs text-gray-600">
+                                {analytics.currentStreak >= 5 ? "Excellent!" : analytics.currentStreak >= 3 ? "Good progress" : "Keep going!"}
+                              </div>
+                            </div>
+
+                            <div className="bg-white p-4 rounded-lg border border-gray-200">
+                              <div className="flex items-center gap-2 mb-2">
+                                <DollarSign className="h-5 w-5 text-green-600" />
+                                <span className="text-sm font-medium text-gray-700">Saved This Week</span>
+                              </div>
+                              <div className="text-lg font-bold text-green-600">${potentialSavings}</div>
+                              <div className="text-xs text-gray-600">From attended classes</div>
+                            </div>
+
+                            <div className="bg-white p-4 rounded-lg border border-gray-200">
+                              <div className="flex items-center gap-2 mb-2">
+                                <TrendingDown className="h-5 w-5 text-red-600" />
+                                <span className="text-sm font-medium text-gray-700">Risk Analysis</span>
+                              </div>
+                              <div className="text-lg font-bold text-red-600">${potentialLosses}</div>
+                              <div className="text-xs text-gray-600">Potential losses if missed</div>
+                            </div>
+                          </div>
+
+                          <div className="mt-4 p-4 bg-gradient-to-r from-yellow-50 to-orange-50 rounded-lg border border-yellow-200">
+                            <div className="flex items-center gap-2 mb-2">
+                              <Activity className="h-5 w-5 text-yellow-600" />
+                              <span className="text-sm font-medium text-gray-700">AI Recommendation</span>
+                            </div>
+                            <div className="text-sm text-gray-700">
+                              {(() => {
+                                const className = cls.name.toLowerCase();
+                                const daysOfWeek = cls.days?.length || 1;
+                                const timeOfDay = cls.startTime?.toLowerCase().includes('am') ? 'morning' : 'afternoon';
+                                
+                                if (attendanceRate >= 90) {
+                                  if (timeOfDay === 'morning') {
+                                    return `🌅 Early bird champion! You're mastering ${cls.name} and saving $${cls.lossAmount} per class. Your morning discipline is paying off literally!`;
+                                  } else if (className.includes('math') || className.includes('calc')) {
+                                    return `🧮 Math whiz! You're calculating your success perfectly in ${cls.name}. Every class attended = $${cls.lossAmount} in your pocket. Keep solving those problems!`;
+                                  } else if (className.includes('science') || className.includes('bio') || className.includes('chem')) {
+                                    return `🔬 Lab superstar! Your ${cls.name} attendance is experimentally perfect. You're proving your worth $${cls.lossAmount} at a time!`;
+                                  } else if (className.includes('english') || className.includes('writing')) {
+                                    return `📚 Wordsmith warrior! Your ${cls.name} performance is poetry in motion. Every class you attend writes another $${cls.lossAmount} success story!`;
+                                  } else if (className.includes('history') || className.includes('social')) {
+                                    return `📜 History maker! You're creating your legacy in ${cls.name}. Each class attended preserves $${cls.lossAmount} of your future!`;
+                                  } else {
+                                    return `🔥 ${cls.name} master! You're absolutely crushing it and banking $${cls.lossAmount} per class. Your consistency is your superpower!`;
+                                  }
+                                } else if (attendanceRate >= 70) {
+                                  if (daysOfWeek >= 4) {
+                                    return `💪 ${cls.name} warrior! With ${daysOfWeek} classes weekly, you're building discipline. Imagine the extra $${potentialLosses} you could keep by perfect attendance!`;
+                                  } else if (timeOfDay === 'morning') {
+                                    return `⏰ Morning hustler! Your ${cls.name} game is strong. That ${daysOfWeek}x/week routine could earn you an extra $${potentialLosses} - don't hit snooze on your cash!`;
+                                  } else {
+                                    return `📈 Solid progress in ${cls.name}! You're saving $${potentialSavings} but leaving $${potentialLosses} on the table. Your future self will thank you for showing up!`;
+                                  }
+                                } else if (attendanceRate >= 50) {
+                                  if (className.includes('gym') || className.includes('pe')) {
+                                    return `💪 Fitness focus! Every ${cls.name} session you skip is like paying for a gym membership you don't use. Stop wasting $${cls.lossAmount} and get your workout in!`;
+                                  } else if (timeOfDay === 'morning') {
+                                    return `☕ Coffee money! That $${cls.lossAmount} you lose by skipping ${cls.name} could buy you fancy coffee for a week. Wake up and claim your cash instead!`;
+                                  } else if (daysOfWeek === 1) {
+                                    return `🎯 One shot! You only have ${cls.name} once a week - missing it costs you $${cls.lossAmount} for 7 days! Make it count and get your money!`;
+                                  } else {
+                                    return `⚡ Money leak detected! Each ${cls.name} absence drains $${cls.lossAmount} from your wallet. That's ${potentialLosses} weekly you're giving away for free!`;
+                                  }
+                                } else {
+                                  if (className.includes('math') || className.includes('calc')) {
+                                    return `🚨 Calculate this loss! You're failing ${cls.name} attendance and losing $${cls.lossAmount} each time. That's ${potentialLosses} weekly - enough for a new calculator!`;
+                                  } else if (className.includes('science') || className.includes('lab')) {
+                                    return `🔬 Failed experiment! Your ${cls.name} attendance hypothesis is wrong. Each miss costs $${cls.lossAmount} - that's ${potentialLosses} weekly burning a hole in your lab coat!`;
+                                  } else if (timeOfDay === 'morning') {
+                                    return `⏰ Alarm clock betrayal! You're paying $${cls.lossAmount} to sleep through ${cls.name}. That alarm isn't just waking you up - it's calling you to collect your money!`;
+                                  } else if (daysOfWeek >= 3) {
+                                    return `📅 Calendar catastrophe! With ${daysOfWeek} ${cls.name} classes weekly, you're scheduling failure. Each missed class is $${cls.lossAmount} you're literally throwing away!`;
+                                  } else {
+                                    return `💸 Wallet evacuation! Your ${cls.name} attendance is draining $${potentialLosses} weekly. Every class you skip is like setting $${cls.lossAmount} on fire. Stop burning your money!`;
+                                  }
+                                }
+                              })()}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </div>
             )}
           </div>
         )}
