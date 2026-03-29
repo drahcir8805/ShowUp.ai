@@ -18,6 +18,8 @@
   --landing-card-deep: #d4c9b0;
   --landing-border: #c9bda4;
   --landing-line: rgba(201, 189, 164, 0.4);
+  /* Softer beige for sections without the flickering grid (matches warm wash elsewhere) */
+  --landing-band: color-mix(in srgb, var(--landing-warm) 18%, var(--landing-base));
   /* Brand purple — shadcn’s default --accent is a neutral tint; we use this for ShowUp + var(--accent) in marketing */
   --accent: #9b59b6;
   --accent-foreground: #fafafa;

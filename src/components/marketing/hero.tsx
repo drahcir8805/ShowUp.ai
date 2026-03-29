@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export function Hero() {
   return (
-    <section className="relative overflow-hidden px-6 pt-20 pb-28 sm:pt-28 sm:pb-36">
+    <section className="relative overflow-hidden bg-[var(--landing-band)] px-6 pt-20 pb-28 sm:pt-28 sm:pb-36">
       <div
         className="pointer-events-none absolute inset-0 opacity-40"
         aria-hidden

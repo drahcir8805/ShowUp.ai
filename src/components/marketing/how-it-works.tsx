@@ -1,4 +1,8 @@
-import { FlickeringGrid } from "@/components/ui/flickering-grid";
+import { FlickeringSectionOverlays } from "@/components/marketing/flickering-section-overlays";
+import {
+  FlickeringGrid,
+  SHOWUP_FLICKER_GRADIENT,
+} from "@/components/ui/flickering-grid";
 
 const steps = [
   {
@@ -32,12 +36,12 @@ export function HowItWorks() {
           squareSize={3}
           gridGap={5}
           flickerChance={0.35}
-          color="rgb(95, 84, 68)"
+          gradientColors={SHOWUP_FLICKER_GRADIENT}
           maxOpacity={0.2}
           className="h-full min-h-[320px] w-full"
         />
       </div>
-      <div className="pointer-events-none absolute inset-0 z-[1] bg-[color-mix(in_srgb,var(--landing-warm)_22%,transparent)]" />
+      <FlickeringSectionOverlays />
       <div className="relative z-10 mx-auto max-w-6xl">
         <h2 className="text-center text-sm font-medium uppercase tracking-widest text-[#6a6a6a]">
           How it works

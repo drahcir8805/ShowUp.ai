@@ -1,42 +1,92 @@
-import Link from "next/link";
+"use client";
 
-const nav = [
-  { href: "#why", label: "Why" },
-  { href: "#features", label: "Product" },
-  { href: "#trust", label: "Trust" },
-  { href: "#how", label: "How it works" },
+import Link from "next/link";
+import { useState } from "react";
+import {
+  MobileNav,
+  MobileNavHeader,
+  MobileNavMenu,
+  MobileNavToggle,
+  NavBody,
+  Navbar,
+  NavbarButton,
+  NavItems,
+} from "@/components/ui/resizable-navbar";
+
+const navItems = [
+  { name: "Why", link: "/#why" },
+  { name: "Product", link: "/#features" },
+  { name: "Trust", link: "/#trust" },
+  { name: "How it works", link: "/#how" },
 ];
 
-export function SiteHeader() {
+function Logo() {
   return (
-    <header className="sticky top-0 z-50 border-b border-[var(--landing-line)] bg-[color-mix(in_srgb,var(--landing-base)_92%,transparent)] backdrop-blur-md">
-      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
-        <Link
-          href="/"
-          className="text-lg font-semibold tracking-tight text-[#4a4a4a]"
+    <Link
+      href="/"
+      className="relative z-20 flex shrink-0 items-center px-2 py-1 text-lg font-semibold tracking-tight text-[#4a4a4a]"
+    >
+      ShowUp<span className="text-[var(--accent)]">.ai</span>
+    </Link>
+  );
+}
+
+export function SiteHeader() {
+  const [mobileOpen, setMobileOpen] = useState(false);
+
+  return (
+    <Navbar className="bg-transparent">
+      <NavBody>
+        <Logo />
+        <NavItems
+          items={navItems}
+          itemClassName="text-[#6a6a6a] hover:!text-[var(--accent)]"
+          onItemClick={() => {}}
+        />
+        <div className="relative z-20 flex items-center gap-2">
+          <NavbarButton
+            as={Link}
+            href="/betting"
+            className="!border-0 !bg-[var(--accent)] !text-white shadow-none hover:!-translate-y-0 hover:!opacity-90"
+          >
+            Start Betting
+          </NavbarButton>
+        </div>
+      </NavBody>
+      <MobileNav>
+        <MobileNavHeader>
+          <Logo />
+          <div className="z-50 lg:hidden">
+            <MobileNavToggle
+              isOpen={mobileOpen}
+              onClick={() => setMobileOpen((o) => !o)}
+            />
+          </div>
+        </MobileNavHeader>
+        <MobileNavMenu
+          isOpen={mobileOpen}
+          onClose={() => setMobileOpen(false)}
+          className="border border-[var(--landing-border)]/40 bg-[var(--landing-base)] dark:bg-[var(--landing-base)]"
         >
-          ShowUp<span className="text-[var(--accent)]">.ai</span>
-        </Link>
-        <nav className="hidden items-center gap-8 text-sm text-[#6a6a6a] sm:flex">
-          {nav.map((item) => (
-            <Link
-              key={item.href}
-              href={item.href}
-              className="transition-colors hover:text-[var(--accent)]"
+          {navItems.map((item) => (
+            <a
+              key={item.link}
+              href={item.link}
+              className="w-full rounded-md px-2 py-2 text-[#4a4a4a] hover:bg-[var(--landing-warm)]/80"
+              onClick={() => setMobileOpen(false)}
             >
-              {item.label}
-            </Link>
+              {item.name}
+            </a>
           ))}
-        </nav>
-        <div className="flex items-center gap-3">
           <Link
             href="/betting"
-            className="rounded-full bg-[var(--accent)] px-4 py-2 text-sm font-medium text-white transition-opacity hover:opacity-90"
+            className="w-full rounded-md px-2 py-2 font-semibold text-[var(--accent)] hover:bg-[var(--landing-warm)]/80"
+            onClick={() => setMobileOpen(false)}
           >
             Start Betting
           </Link>
-        </div>
-      </div>
-    </header>
+        </MobileNavMenu>
+      </MobileNav>
+    </Navbar>
   );
 }

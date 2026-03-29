@@ -4,11 +4,71 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 
 import { cn } from "@/lib/utils"
 
+/** Purple → sand → gold → yellow (matches landing accents) */
+export const SHOWUP_FLICKER_GRADIENT = [
+  "#9b59b6",
+  "#a67c52",
+  "#d4b04a",
+  "#f1c40f",
+] as const
+
+function parseColorToRgb(color: string): [number, number, number] {
+  const c = color.trim()
+  if (c.startsWith("#")) {
+    const hex = c.slice(1)
+    const full =
+      hex.length === 3
+        ? hex
+            .split("")
+            .map((x) => x + x)
+            .join("")
+        : hex
+    const n = parseInt(full, 16)
+    if (!Number.isNaN(n) && full.length === 6) {
+      return [(n >> 16) & 255, (n >> 8) & 255, n & 255]
+    }
+  }
+  if (typeof document !== "undefined") {
+    const canvas = document.createElement("canvas")
+    canvas.width = canvas.height = 1
+    const ctx = canvas.getContext("2d")
+    if (ctx) {
+      ctx.fillStyle = color
+      ctx.fillRect(0, 0, 1, 1)
+      const [r, g, b] = Array.from(ctx.getImageData(0, 0, 1, 1).data)
+      return [r, g, b]
+    }
+  }
+  return [95, 84, 68]
+}
+
+function sampleGradient(
+  stops: [number, number, number][],
+  t: number,
+): [number, number, number] {
+  if (stops.length === 0) return [0, 0, 0]
+  if (stops.length === 1) return stops[0]
+  const tClamped = Math.max(0, Math.min(1, t))
+  const scaled = tClamped * (stops.length - 1)
+  const i = Math.floor(scaled)
+  const frac = scaled - i
+  const a = stops[i]
+  const b = stops[Math.min(i + 1, stops.length - 1)]
+  return [
+    a[0] + (b[0] - a[0]) * frac,
+    a[1] + (b[1] - a[1]) * frac,
+    a[2] + (b[2] - a[2]) * frac,
+  ]
+}
+
 interface FlickeringGridProps extends React.HTMLAttributes<HTMLDivElement> {
   squareSize?: number
   gridGap?: number
   flickerChance?: number
+  /** Single color (used when `gradientColors` is not set) */
   color?: string
+  /** 2+ CSS colors — diagonal blend; flicker modulates opacity */
+  gradientColors?: readonly string[] | string[]
   width?: number
   height?: number
   className?: string
@@ -20,6 +80,7 @@ export const FlickeringGrid: React.FC<FlickeringGridProps> = ({
   gridGap = 6,
   flickerChance = 0.3,
   color = "rgb(0, 0, 0)",
+  gradientColors,
   width,
   height,
   className,
@@ -31,8 +92,13 @@ export const FlickeringGrid: React.FC<FlickeringGridProps> = ({
   const [isInView, setIsInView] = useState(false)
   const [canvasSize, setCanvasSize] = useState({ width: 0, height: 0 })
 
+  const gradientStops = useMemo(() => {
+    if (!gradientColors || gradientColors.length < 2) return null
+    return gradientColors.map((c) => parseColorToRgb(c))
+  }, [gradientColors])
+
   const memoizedColor = useMemo(() => {
-    const toRGBA = (color: string) => {
+    const toRGBA = (c: string) => {
       if (typeof window === "undefined") {
         return `rgba(0, 0, 0,`
       }
@@ -40,7 +106,7 @@ export const FlickeringGrid: React.FC<FlickeringGridProps> = ({
       canvas.width = canvas.height = 1
       const ctx = canvas.getContext("2d")
       if (!ctx) return "rgba(255, 0, 0,"
-      ctx.fillStyle = color
+      ctx.fillStyle = c
       ctx.fillRect(0, 0, 1, 1)
       const [r, g, b] = Array.from(ctx.getImageData(0, 0, 1, 1).data)
       return `rgba(${r}, ${g}, ${b},`
@@ -96,7 +162,15 @@ export const FlickeringGrid: React.FC<FlickeringGridProps> = ({
       for (let i = 0; i < cols; i++) {
         for (let j = 0; j < rows; j++) {
           const opacity = squares[i * rows + j]
-          ctx.fillStyle = `${memoizedColor}${opacity})`
+          if (gradientStops && gradientStops.length >= 2) {
+            const tx = cols > 1 ? i / (cols - 1) : 0.5
+            const ty = rows > 1 ? j / (rows - 1) : 0.5
+            const t = (tx + ty) / 2
+            const [r, g, b] = sampleGradient(gradientStops, t)
+            ctx.fillStyle = `rgba(${Math.round(r)},${Math.round(g)},${Math.round(b)},${opacity})`
+          } else {
+            ctx.fillStyle = `${memoizedColor}${opacity})`
+          }
           ctx.fillRect(
             i * (squareSize + gridGap) * dpr,
             j * (squareSize + gridGap) * dpr,
@@ -106,7 +180,7 @@ export const FlickeringGrid: React.FC<FlickeringGridProps> = ({
         }
       }
     },
-    [memoizedColor, squareSize, gridGap]
+    [memoizedColor, squareSize, gridGap, gradientStops]
   )
 
   useEffect(() => {

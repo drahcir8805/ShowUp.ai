@@ -1,10 +1,14 @@
-import { FlickeringGrid } from "@/components/ui/flickering-grid";
+import { FlickeringSectionOverlays } from "@/components/marketing/flickering-section-overlays";
+import {
+  FlickeringGrid,
+  SHOWUP_FLICKER_GRADIENT,
+} from "@/components/ui/flickering-grid";
 
 export function WhyMarketsSection() {
   return (
     <section
       id="why"
-      className="scroll-mt-24 border-t border-[var(--landing-line)] px-6 py-24"
+      className="scroll-mt-24 border-t border-[var(--landing-line)] bg-[var(--landing-band)] px-6 py-24"
     >
       <div className="mx-auto max-w-6xl">
         <p className="text-center text-sm font-medium uppercase tracking-widest text-[#6a6a6a]">
@@ -76,13 +80,12 @@ export function ProductHighlightsSection() {
           squareSize={3}
           gridGap={5}
           flickerChance={0.35}
-          color="rgb(95, 84, 68)"
+          gradientColors={SHOWUP_FLICKER_GRADIENT}
           maxOpacity={0.2}
           className="h-full min-h-[320px] w-full"
         />
       </div>
-      {/* Light wash only — must stay partly transparent or it hides the canvas grid */}
-      <div className="pointer-events-none absolute inset-0 z-[1] bg-[color-mix(in_srgb,var(--landing-warm)_22%,transparent)]" />
+      <FlickeringSectionOverlays />
       <div className="relative z-10 mx-auto max-w-6xl">
         <p className="text-center text-sm font-medium uppercase tracking-widest text-[#6a6a6a]">
           What you’re building toward
@@ -94,7 +97,7 @@ export function ProductHighlightsSection() {
           {highlights.map((item) => (
             <li
               key={item.title}
-              className="rounded-2xl border border-[var(--landing-border)]/55 bg-[var(--landing-card-deep)] p-6 shadow-[0_4px_16px_rgba(45,40,30,0.06)] ring-1 ring-[var(--landing-border)]/30 backdrop-blur-[1px]"
+              className="relative rounded-2xl border border-[var(--landing-border)]/45 bg-[var(--landing-card)] p-6 shadow-[0_4px_20px_rgba(62,56,40,0.06),0_2px_6px_rgba(62,56,40,0.04)] ring-1 ring-[var(--landing-border)]/25"
             >
               <h3 className="text-lg font-semibold text-[#4a4a4a]">
                 {item.title}
@@ -129,7 +132,7 @@ export function TrustResolutionSection() {
   return (
     <section
       id="trust"
-      className="scroll-mt-24 border-t border-[var(--landing-line)] px-6 py-24"
+      className="scroll-mt-24 border-t border-[var(--landing-line)] bg-[var(--landing-band)] px-6 py-24"
     >
       <div className="mx-auto max-w-6xl">
         <p className="text-center text-sm font-medium uppercase tracking-widest text-[#6a6a6a]">
