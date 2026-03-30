@@ -170,6 +170,7 @@ export default function BettingPage() {
       
       // Convert Supabase data to ClassRecord format
       const classRecords: ClassRecord[] = (data || []).map(cls => createClassObject({
+        id: cls.id,
         name: cls.name,
         address: cls.address,
         lat: cls.latitude,
@@ -268,6 +269,7 @@ export default function BettingPage() {
 
         // Create ClassRecord from Supabase data
         const record = createClassObject({
+          id: data.id,
           name: data.name,
           address: data.address,
           lat: data.latitude,
@@ -311,6 +313,27 @@ export default function BettingPage() {
   };
 
   const totalPotentialLoss = classes.reduce((sum, cls) => sum + cls.lossAmount, 0);
+
+  const deleteClass = async (classId: string) => {
+    try {
+      const { error } = await supabase
+        .from("classes")
+        .delete()
+        .eq("id", classId);
+
+      if (error) throw error;
+
+      setClasses((prev) => prev.filter((cls) => cls.id !== classId));
+      setExpandedClassesInOverview((prev) => {
+        const updated = new Set(prev);
+        updated.delete(classId);
+        return updated;
+      });
+    } catch (error) {
+      console.error("Error deleting class:", error);
+      alert("Unable to delete class right now. Please try again.");
+    }
+  };
 
   const finalizeBets = () => {
     console.log("Final bets:", { totalBetAmount, classes });
@@ -696,6 +719,7 @@ export default function BettingPage() {
                   <div className="space-y-3">
                     {classes.map((cls) => {
                       const isExpanded = expandedClassesInOverview.has(cls.id);
+                      const analytics = calculateClassAnalytics(cls);
                       return (
                         <div key={cls.id} className="bg-white border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow">
                           {/* Clickable Header */}
@@ -733,6 +757,20 @@ export default function BettingPage() {
                                     <ChevronDown className="w-5 h-5" />
                                   )}
                                 </div>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    const confirmed = window.confirm(`Delete ${cls.name}?`);
+                                    if (confirmed) {
+                                      void deleteClass(cls.id);
+                                    }
+                                  }}
+                                  className="border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
+                                >
+                                  Delete
+                                </Button>
                               </div>
                             </div>
                           </div>
@@ -751,43 +789,38 @@ export default function BettingPage() {
                                 </div>
 
                                 {/* Attendance Analytics */}
-                                {(() => {
-                                  const analytics = calculateClassAnalytics(cls);
-                                  return (
-                                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                      <div className="bg-gradient-to-r from-green-50 to-green-100 p-4 rounded-lg border border-green-200">
-                                        <div className="flex items-center gap-2 mb-2">
-                                          <TrendingUp className="w-4 h-4 text-green-600" />
-                                          <span className="text-sm font-medium text-green-800">Current Streak</span>
-                                        </div>
-                                        <div className="text-2xl font-bold text-green-700">{analytics.currentStreak} days</div>
-                                        <div className="text-xs text-green-600">
-                                          {analytics.currentStreak > 0 ? "Keep it going!" : "Start your streak!"}
-                                        </div>
-                                      </div>
-                                      
-                                      <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200">
-                                        <div className="flex items-center gap-2 mb-2">
-                                          <Zap className="w-4 h-4 text-blue-600" />
-                                          <span className="text-sm font-medium text-blue-800">Total Attendance</span>
-                                        </div>
-                                        <div className="text-2xl font-bold text-blue-700">{analytics.weekAttendance}</div>
-                                        <div className="text-xs text-blue-600">
-                                          {analytics.isPerfectWeek ? "Perfect attendance!" : `${analytics.weekAttendancePercent.toFixed(0)}% completion`}
-                                        </div>
-                                      </div>
-                                      
-                                      <div className="bg-gradient-to-r from-purple-50 to-purple-100 p-4 rounded-lg border border-purple-200">
-                                        <div className="flex items-center gap-2 mb-2">
-                                          <DollarSign className="w-4 h-4 text-purple-600" />
-                                          <span className="text-sm font-medium text-purple-800">Saved</span>
-                                        </div>
-                                        <div className="text-2xl font-bold text-purple-700">${analytics.totalSaved}</div>
-                                        <div className="text-xs text-purple-600">This semester</div>
-                                      </div>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                  <div className="bg-gradient-to-r from-green-50 to-green-100 p-4 rounded-lg border border-green-200">
+                                    <div className="flex items-center gap-2 mb-2">
+                                      <TrendingUp className="w-4 h-4 text-green-600" />
+                                      <span className="text-sm font-medium text-green-800">Current Streak</span>
                                     </div>
-                                  );
-                                })()}
+                                    <div className="text-2xl font-bold text-green-700">{analytics.currentStreak} days</div>
+                                    <div className="text-xs text-green-600">
+                                      {analytics.currentStreak > 0 ? "Keep it going!" : "Start your streak!"}
+                                    </div>
+                                  </div>
+
+                                  <div className="bg-gradient-to-r from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200">
+                                    <div className="flex items-center gap-2 mb-2">
+                                      <Zap className="w-4 h-4 text-blue-600" />
+                                      <span className="text-sm font-medium text-blue-800">Total Attendance</span>
+                                    </div>
+                                    <div className="text-2xl font-bold text-blue-700">{analytics.weekAttendance}</div>
+                                    <div className="text-xs text-blue-600">
+                                      {analytics.isPerfectWeek ? "Perfect attendance!" : `${analytics.weekAttendancePercent.toFixed(0)}% completion`}
+                                    </div>
+                                  </div>
+
+                                  <div className="bg-gradient-to-r from-purple-50 to-purple-100 p-4 rounded-lg border border-purple-200">
+                                    <div className="flex items-center gap-2 mb-2">
+                                      <DollarSign className="w-4 h-4 text-purple-600" />
+                                      <span className="text-sm font-medium text-purple-800">Saved</span>
+                                    </div>
+                                    <div className="text-2xl font-bold text-purple-700">${analytics.totalSaved}</div>
+                                    <div className="text-xs text-purple-600">This semester</div>
+                                  </div>
+                                </div>
 
                                 {/* Smart Insights */}
                                 <div className="bg-gradient-to-r from-[var(--accent)]/10 to-[var(--yellow)]/10 p-4 rounded-lg border border-[var(--accent)]/20">
@@ -798,15 +831,31 @@ export default function BettingPage() {
                                   <div className="space-y-2 text-sm text-[#6a6a6a]">
                                     <div className="flex items-start gap-2">
                                       <div className="w-2 h-2 bg-green-500 rounded-full mt-1.5"></div>
-                                      <p>Your attendance rate is <span className="font-semibold text-green-600">92%</span> - above average!</p>
+                                      <p>
+                                        Current attendance rate:{" "}
+                                        <span className="font-semibold text-green-600">
+                                          {analytics.weekAttendancePercent.toFixed(0)}%
+                                        </span>{" "}
+                                        ({analytics.weekAttendance}).
+                                      </p>
                                     </div>
                                     <div className="flex items-start gap-2">
                                       <div className="w-2 h-2 bg-blue-500 rounded-full mt-1.5"></div>
-                                      <p>Best performance on <span className="font-semibold">Tuesdays</span> - keep that momentum!</p>
+                                      <p>
+                                        Class meets on{" "}
+                                        <span className="font-semibold">
+                                          {cls.days.length > 0 ? cls.days.join(", ") : "scheduled days not set"}
+                                        </span>
+                                        .
+                                      </p>
                                     </div>
                                     <div className="flex items-start gap-2">
                                       <div className="w-2 h-2 bg-[var(--accent)] rounded-full mt-1.5"></div>
-                                      <p>Next class in <span className="font-semibold">2 hours 15 mins</span> - you&apos;re on track!</p>
+                                      <p>
+                                        {analytics.weekAttendancePercent === 0
+                                          ? "No successful check-ins yet. Your first check-in will start your streak."
+                                          : `Current streak: ${analytics.currentStreak} day${analytics.currentStreak === 1 ? "" : "s"}.`}
+                                      </p>
                                     </div>
                                   </div>
                                 </div>
