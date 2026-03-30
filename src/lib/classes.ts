@@ -1,6 +1,7 @@
 /** Shape mirrors a future Supabase `classes` row. */
 
 export type ClassFormInput = {
+  id?: string;
   name: string;
   address: string;
   lat: number;
@@ -39,7 +40,7 @@ export type ClassRecord = {
 
 export function createClassObject(formData: ClassFormInput): ClassRecord {
   return {
-    id: crypto.randomUUID(),
+    id: formData.id ?? crypto.randomUUID(),
     name: formData.name,
     address: formData.address,
     lat: formData.lat,
