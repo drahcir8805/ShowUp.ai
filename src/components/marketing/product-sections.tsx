@@ -15,23 +15,22 @@ export function WhyMarketsSection() {
           Why ShowUp exists
         </p>
         <h2 className="mx-auto mt-3 max-w-3xl text-center text-3xl font-semibold tracking-tight text-[#4a4a4a] sm:text-4xl">
-          Turn “I’ll go tomorrow” into a market with a price on it.
+          Turn “I’ll go next time" into a bet againist your friends. 
         </h2>
         <p className="mx-auto mt-6 max-w-2xl text-center text-lg leading-relaxed text-[#6a6a6a]">
           Most attendance apps nag you. ShowUp lets you and your friends bet on
-          real behavior — so skipping has a cost, and showing up pays off. It’s
-          Polymarket energy for the lecture hall: odds shift as your track record
-          updates, not as you update your story.
+          each other — so skipping has a cost, and showing up pays off. It’s
+          Polymarket energy for the lecture hall.
         </p>
         <div className="mt-14 grid gap-8 sm:grid-cols-2">
           <div className="rounded-2xl border border-[var(--landing-border)]/45 bg-[var(--landing-card)] p-8 shadow-[0_4px_20px_rgba(62,56,40,0.05)] ring-1 ring-[var(--landing-border)]/25">
             <h3 className="text-lg font-semibold text-[#4a4a4a]">
-              Skin in the game
+              Yoyr money is in the game
             </h3>
             <p className="mt-3 text-sm leading-relaxed text-[#6a6a6a]">
-              You commit stakes for the term — play-money credits or small real
-              amounts you choose. When you ghost class, the market takes its
-              cut; when you lock in, you prove the doubters wrong.
+              You commit stakes for the term. Whether its a small or large amount.
+              When you skip a class, your friends takes its
+              cut; when you lock in, you prove them doubters wrong.
             </p>
           </div>
           <div className="rounded-2xl border border-[var(--landing-border)]/45 bg-[var(--landing-card)] p-8 shadow-[0_4px_20px_rgba(62,56,40,0.05)] ring-1 ring-[var(--landing-border)]/25">
@@ -39,10 +38,10 @@ export function WhyMarketsSection() {
               Social accountability
             </h3>
             <p className="mt-3 text-sm leading-relaxed text-[#6a6a6a]">
-              Run markets solo or with your crew. Friends can trade on whether
+              Run bets solo or with your crew. Friends can trade on whether
               you’ll show — which sounds brutal until it’s the reason you
-              actually go. Reputation becomes visible, not just a group chat
-              promise.
+              actually go, not just a group chat promise.Betting history becomes 
+              visible and you are giving a credit score.
             </p>
           </div>
         </div>

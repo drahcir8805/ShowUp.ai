@@ -8,18 +8,18 @@ import { Safari } from "@/components/ui/safari-browser";
 const steps = [
   {
     step: "01",
-    title: "Set your line",
-    body: "Bet on yourself by putting money into the app. Set your stake for the semester - the more you commit, the more you have to lose (or prove).",
+    title: "Set your bet",
+    body: "Sign up and bet on yourself by putting money into the app. Set your bet amount for the semester - the more you put in, the more you have to lose (or prove).",
   },
   {
     step: "02",
     title: "Go to class",
-    body: "Add your class locations and schedules. The app tracks your location during class time - show up and you're safe, skip class and lose your stake.",
+    body: "Add your class locations and schedules. The app tracks your location during class time, show up and you're safe, skip class and lose your money.",
   },
   {
     step: "03",
-    title: "Settle the market",
-    body: "Location data automatically resolves your bets. Attendance is verified, money is deducted for absences, and your reputation is updated.",
+    title: "Watch your progress",
+    body: "Attendance is verified, money is deducted for absences, and your reputation is updated.",
   },
 ];
 
