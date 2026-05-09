@@ -18,8 +18,8 @@ export function WhyMarketsSection() {
           Turn “I’ll go next time" into a bet againist your friends. 
         </h2>
         <p className="mx-auto mt-6 max-w-2xl text-center text-lg leading-relaxed text-[#6a6a6a]">
-          Most attendance apps nag you. ShowUp lets you and your friends bet on
-          each other — so skipping has a cost, and showing up pays off. It’s
+          We all skipped lectures multiple times. ShowUp lets you and your friends bet on 
+          whether you will show up. So skipping has a cost, and showing up pays off. It’s
           Polymarket energy for the lecture hall.
         </p>
         <div className="mt-14 grid gap-8 sm:grid-cols-2">
@@ -30,7 +30,7 @@ export function WhyMarketsSection() {
             <p className="mt-3 text-sm leading-relaxed text-[#6a6a6a]">
               You commit stakes for the term. Whether its a small or large amount.
               When you skip a class, your friends takes its
-              cut; when you lock in, you prove them doubters wrong.
+              cut; when you lock in, you prove the doubters wrong.
             </p>
           </div>
           <div className="rounded-2xl border border-[var(--landing-border)]/45 bg-[var(--landing-card)] p-8 shadow-[0_4px_20px_rgba(62,56,40,0.05)] ring-1 ring-[var(--landing-border)]/25">
@@ -38,10 +38,9 @@ export function WhyMarketsSection() {
               Social accountability
             </h3>
             <p className="mt-3 text-sm leading-relaxed text-[#6a6a6a]">
-              Run bets solo or with your crew. Friends can trade on whether
-              you’ll show — which sounds brutal until it’s the reason you
-              actually go, not just a group chat promise.Betting history becomes 
-              visible and you are giving a credit score.
+              Run bets solo or with your friends. Friends can see your bet history 
+              and ShowUpgive you a credit score, which sounds brutal until it’s the reason you
+              actually go, not just a group chat promise.
             </p>
           </div>
         </div>
@@ -52,16 +51,16 @@ export function WhyMarketsSection() {
 
 const highlights = [
   {
-    title: "Semester-long lines",
-    body: "Set recurring class windows and stakes once; we track outcomes across the term so one-off excuses don’t reset the board.",
+    title: "Accountability for what you signed up for",
+    body: "Make every lecture count. Set your class schedule and bets at the start of the semester, so you actually show up for lectures you’ve invested in and avoid wasting tuition. We help you hold yourself accountable week after week, not just after the guilt of a missed class.",
   },
   {
     title: "Location-backed check-ins",
-    body: "Tie attendance to places and times you define — so resolutions reflect whether you were really there, not whether you said you were.",
+    body: "Tie attendance to places and times you define — so goals are met by actually being there, not just saying you were.",
   },
   {
-    title: "Markets, not guilt trips",
-    body: "Buy and sell side bets with friends on attendance outcomes — prices move as people’s streaks and slip-ups become public knowledge.",
+    title: "Challenge your friends, compete for fun",
+    body: "Betting on showing up turns class attendance into a friendly group competition—make it a fun challenge to see who’s the most consistent. The rivalry and accountability give you that extra push to show up, and over time, it pays off in better grades, stronger exam results, and real discipline that sticks well beyond the classroom.",
   },
 ];
 
@@ -90,7 +89,7 @@ export function ProductHighlightsSection() {
           What you’re building toward
         </p>
         <h2 className="mx-auto mt-3 max-w-2xl text-center text-3xl font-semibold tracking-tight text-[#4a4a4a] sm:text-4xl">
-          Everything on one campus-sized product surface.
+          We make sure you show up.
         </h2>
         <ul className="mt-14 grid gap-6 sm:grid-cols-3">
           {highlights.map((item) => (
