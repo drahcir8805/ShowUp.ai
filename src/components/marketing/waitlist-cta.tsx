@@ -12,7 +12,7 @@ export function WaitlistCta() {
         </h2>
         <p className="mt-4 text-[#6a6a6a]">
           We’re onboarding a small set of schools and friend groups. Drop your
-          email — we’ll reach out when your market is ready to open.
+          email — we’ll reach out when the app is ready to open.
         </p>
         <WaitlistForm />
         <p className="mt-6 text-xs text-[#6a6a6a]/80">

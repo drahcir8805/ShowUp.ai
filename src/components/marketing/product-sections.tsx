@@ -39,7 +39,7 @@ export function WhyMarketsSection() {
             </h3>
             <p className="mt-3 text-sm leading-relaxed text-[#6a6a6a]">
               Run bets solo or with your friends. Friends can see your bet history 
-              and ShowUpgive you a credit score, which sounds brutal until it’s the reason you
+              and ShowUp gives you a credit score, which sounds brutal until it’s the reason you
               actually go, not just a group chat promise.
             </p>
           </div>
@@ -51,16 +51,16 @@ export function WhyMarketsSection() {
 
 const highlights = [
   {
-    title: "Accountability for what you signed up for",
-    body: "Make every lecture count. Set your class schedule and bets at the start of the semester, so you actually show up for lectures you’ve invested in and avoid wasting tuition. We help you hold yourself accountable week after week, not just after the guilt of a missed class.",
+    title: "Stay accountable to your goals",
+    body: "Skipping one lecture turns into skipping five pretty fast. Set your schedule, make bets with friends, and keep yourself consistent throughout the semester. Less guilt, fewer missed classes, and a better reason to get out of bed for that 8:30",
   },
   {
-    title: "Location-backed check-ins",
+    title: "Real check-ins, not excuses",
     body: "Tie attendance to places and times you define — so goals are met by actually being there, not just saying you were.",
   },
   {
-    title: "Challenge your friends, compete for fun",
-    body: "Betting on showing up turns class attendance into a friendly group competition—make it a fun challenge to see who’s the most consistent. The rivalry and accountability give you that extra push to show up, and over time, it pays off in better grades, stronger exam results, and real discipline that sticks well beyond the classroom.",
+    title: "Miss class, lose the bet",
+    body: "Miss a lecture, and a small part of your bet goes to the friends who showed up. Financial consequences: the academic advisor nobody asked for",
   },
 ];
 
@@ -113,8 +113,8 @@ export function ProductHighlightsSection() {
 
 const trustPoints = [
   {
-    title: "Clear resolution rules",
-    body: "Every market spells out what counts as “showed up,” when it settles, and what data we use — before anyone puts stakes down.",
+    title: "Clear attendance tracking",
+    body: "Every bet clearly shows how attendance is verified and when payouts happen.",
   },
   {
     title: "Built for real campuses",
@@ -122,7 +122,7 @@ const trustPoints = [
   },
   {
     title: "You stay in control",
-    body: "You choose what to stake, which classes to track, and who can see your markets. We’re building for opt-in accountability.",
+    body: "Choose your classes, your bets, and who you want to compete with.",
   },
 ];
 
@@ -137,12 +137,12 @@ export function TrustResolutionSection() {
           Trust & fairness
         </p>
         <h2 className="mx-auto mt-3 max-w-2xl text-center text-3xl font-semibold tracking-tight text-[#4a4a4a] sm:text-4xl">
-          Markets only work if everyone knows how they end.
+        Everyone plays by the same rules.
         </h2>
         <p className="mx-auto mt-5 max-w-2xl text-center text-[#6a6a6a]">
-          ShowUp is designed so outcomes are explainable: your bets resolve from
-          check-ins and rules you can read in plain English — not a black box
-          score or a roommate’s opinion.
+        Your bets are based on real lecture check-ins and class schedules, 
+        so there’s no arguing about who showed up and who didn’t. Simple, 
+        transparent, and impossible for your flaky friend to debate afterward.
         </p>
         <ul className="mt-12 space-y-4">
           {trustPoints.map((item) => (
