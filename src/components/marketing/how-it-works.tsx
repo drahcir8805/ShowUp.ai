@@ -9,17 +9,17 @@ const steps = [
   {
     step: "01",
     title: "Set your bet",
-    body: "Sign up and bet on yourself by putting money into the app. Set your bet amount for the semester - the more you put in, the more you have to lose (or prove).",
+    body: "Sign up, add your courses, and choose how much you want to put on the line for each class. The more you bet, the more motivation you have to actually get out of bed.",
   },
   {
     step: "02",
-    title: "Go to class",
-    body: "Add your class locations and schedules. The app tracks your location during class time, show up and you're safe, skip class and lose your money.",
+    title: "Show up to class",
+    body: "During lecture time, the app verifies your check-in using your location and network data. If you’re there, you’re good. Skip class, and you lose part of your bet.",
   },
   {
     step: "03",
-    title: "Watch your progress",
-    body: "Attendance is verified, money is deducted for absences, and your reputation is updated.",
+    title: "Track your progress",
+    body: "See your attendance streaks, missed classes, and how much money you’ve kept or lost throughout the semester. Tiny financial consequences.",
   },
 ];
 
